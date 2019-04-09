@@ -2090,11 +2090,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\mooaz\\source\\repos\\botTesting\\botTesting.csproj",
+      "projectUniqueName": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj",
       "projectName": "botTesting",
-      "projectPath": "C:\\Users\\mooaz\\source\\repos\\botTesting\\botTesting.csproj",
+      "projectPath": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj",
       "packagesPath": "C:\\Users\\mooaz\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\mooaz\\source\\repos\\botTesting\\obj\\",
+      "outputPath": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
