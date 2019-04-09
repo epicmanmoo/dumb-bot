@@ -13,9 +13,11 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
-
+        
         static void Main(string[] args)
-        => new Program().MainAsync().GetAwaiter().GetResult();
+        {
+            new Program().MainAsync().GetAwaiter().GetResult();
+        }
 
         private async Task MainAsync()
         {
