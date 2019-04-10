@@ -46,12 +46,12 @@ namespace botTesting.Currency
                     await Context.Channel.SendMessageAsync("How much should I give bruh?");
                     return;
                 }
-                SocketGuildUser CheckUser = Context.User as SocketGuildUser;
-                if (!CheckUser.GuildPermissions.Administrator)
-                {
-                    await Context.Channel.SendMessageAsync("You aren't admin bruh.");
-                    return;
-                }
+                //SocketGuildUser CheckUser = Context.User as SocketGuildUser;
+                //if (!CheckUser.GuildPermissions.Administrator)
+                //{
+                //    await Context.Channel.SendMessageAsync("You aren't admin bruh.");
+                //    return;
+                //}
                
                 await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
                             

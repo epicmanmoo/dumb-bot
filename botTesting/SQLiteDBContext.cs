@@ -12,8 +12,7 @@ namespace botTesting
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {                    
             string DbLocation = Assembly.GetEntryAssembly().Location.Replace(@"\bin\Debug\netcoreapps2.1", @"Data");
-            options.UseSqlite($"Data Source={DbLocation}Database.sqlite");
-            Console.WriteLine($"Data Source={DbLocation}Database.sqlite");
+            options.UseSqlite($"Data Source={DbLocation}Database.sqlite");           
         }
     }
 }

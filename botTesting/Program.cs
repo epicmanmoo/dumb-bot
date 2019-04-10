@@ -38,7 +38,7 @@ namespace botTesting
             Client.Ready += Client_Ready;
             Commands.CommandExecuted += Commands_CommandExecutedAsync;          
             Client.Log += Client_Log;
-            string Token = "Token";
+            string Token = "NTY1MDQ4OTY5MjA2NjkzODg4.XK432A.z3Bcq5ZOsN9L_vErrmGW8hFryA8";
             await Client.LoginAsync(TokenType.Bot, Token);
             await Client.StartAsync();
             await Task.Delay(-1);

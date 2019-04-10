@@ -14,16 +14,16 @@ namespace botTesting
         [Command("serverinvite")]
         public async Task ServerInvite(ulong GuildId)
         {
-            if (!(Context.User.Id == 519689963562991651))
+            SocketGuildUser CheckUser = Context.User as SocketGuildUser;
+            if (!(CheckUser.GuildPermissions.Administrator))
             {
                 await Context.Channel.SendMessageAsync("You are not a bot moderator dumbass :stuck_out_tongue:");
                 return;
             }
-
-
+           
             if (Context.Client.Guilds.Where(x => x.Id == GuildId).Count() < 1)
             {
-                await Context.Channel.SendMessageAsync("I am not in a server with ID " + GuildId);
+                await Context.Channel.SendMessageAsync("Can't send an invite to a server I'm not in :rage:");
             }
 
             if (!(Context.Guild.Id == GuildId))
