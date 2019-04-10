@@ -51,7 +51,7 @@ namespace botTesting
             switch (result)
             {
                 case Errors errors:
-                    
+                    //do stuff with errors
                     break;
                 default:
                     if (!string.IsNullOrEmpty(result?.ErrorReason))
