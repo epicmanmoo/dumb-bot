@@ -36,12 +36,31 @@ namespace botTesting
             Client.MessageReceived += Client_MessageReceived;
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
             Client.Ready += Client_Ready;
+            Commands.CommandExecuted += Commands_CommandExecutedAsync;          
             Client.Log += Client_Log;
             string Token = "NTY1MDQ4OTY5MjA2NjkzODg4.XKwyZw.VXasdTjYji8qj96A0d7cJqrvN8M";
             await Client.LoginAsync(TokenType.Bot, Token);
             await Client.StartAsync();
             await Task.Delay(-1);
 
+        }
+
+     
+        private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+        {
+            switch (result)
+            {
+                case Errors errors:
+                    
+                    break;
+                default:
+                    if (!string.IsNullOrEmpty(result?.ErrorReason))
+                    {
+                        await context.Channel.SendMessageAsync(result.ErrorReason);
+                    }
+                    break;
+            }
+            
         }
 
         private async Task Client_Log(LogMessage Message)
@@ -51,7 +70,7 @@ namespace botTesting
 
         private async Task Client_Ready()
         {
-            await Client.SetGameAsync("Playing with your feelings");
+            await Client.SetGameAsync("with your feelings");
         }
 
         private async Task Client_MessageReceived(SocketMessage MessageParam)
