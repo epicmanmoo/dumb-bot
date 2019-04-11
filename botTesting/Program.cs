@@ -78,7 +78,7 @@ namespace botTesting
             var Message = MessageParam as SocketUserMessage;
             var Context = new SocketCommandContext(Client, Message);
             if (Context.Message == null || Context.Message.Content == "") return;
-            if (Context.User.IsBot) return;
+            if (Context.User.Username.Equals("myBot")) return;
             int ArgPos = 0;
             if (!(Message.HasStringPrefix("!", ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
             var Result = await Commands.ExecuteAsync(Context, ArgPos, null);

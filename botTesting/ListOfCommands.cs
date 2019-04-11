@@ -38,9 +38,9 @@ namespace botTesting
         }
 
         [Command("embed")]
-        public async Task Embed([Remainder] string Input = "None")
+        public async Task Embed([Remainder] string Input = "")
         {
-            if (!Input.Equals("None"))
+            if (!Input.Equals(""))
             {
                 EmbedBuilder Embed = new EmbedBuilder();
                 Embed.WithAuthor("Embed", Context.User.GetAvatarUrl());
