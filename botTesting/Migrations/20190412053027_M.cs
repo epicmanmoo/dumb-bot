@@ -2,7 +2,7 @@
 
 namespace botTesting.Migrations
 {
-    public partial class Migration : Microsoft.EntityFrameworkCore.Migrations.Migration
+    public partial class M : Microsoft.EntityFrameworkCore.Migrations.Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

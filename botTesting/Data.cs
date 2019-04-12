@@ -12,12 +12,12 @@ namespace botTesting
         {
             using (var DbContext = new SQLiteDBContext())
             {
-                if(DbContext.Stones.Where(x => x.UserId == UserId).Count() < 1)
+                if (DbContext.Stones.Where(x => x.UserId == UserId).Count() < 1)
                 {
                     return 0;
                 }
                 return DbContext.Stones.Where(x => x.UserId == UserId).Select(x => x.Amount).FirstOrDefault();
-            }          
+            }
         }
         public static async Task SaveStones(ulong UserId, int Amount)
         {
@@ -38,10 +38,8 @@ namespace botTesting
                     DbContext.Stones.Update(Current);
                 }
                 await DbContext.SaveChangesAsync();
-            }
-
-        }     
-
-   }
+            }          
+        }
+    }
 }
 

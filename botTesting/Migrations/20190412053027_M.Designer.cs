@@ -8,8 +8,8 @@ using botTesting;
 namespace botTesting.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    [Migration("20190410065626_Migration")]
-    partial class Migration
+    [Migration("20190412053027_M")]
+    partial class M
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

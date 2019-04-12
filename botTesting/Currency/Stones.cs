@@ -40,7 +40,12 @@ namespace botTesting.Currency
             [Command("give")]
             public async Task Give(IUser User= null, int Amount= 0)
             {
-                if(User == null)
+                if(Amount < 0)
+                {
+                    await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...``");
+                    return;
+                }
+                if (User == null)
                 {
                     await Context.Channel.SendMessageAsync("Who tf should I give money to?");
                     return;
@@ -77,6 +82,11 @@ namespace botTesting.Currency
                 await Data.SaveStones(User.Id, Amount);
                
             }
+            [Command("take")]
+            public async Task Take(IUser User = null, int Amount= 0)
+            {
+
+            }
             [Command("reset")]
             public async Task Reset(IUser User = null)
             {
@@ -96,7 +106,8 @@ namespace botTesting.Currency
                     int Num= DbContext.Stones.Where(x => x.UserId == User.Id).Count();
                     if (Num == 0)
                     {
-                        await Context.Channel.SendMessageAsync("No user found to reset");
+                        await Context.Channel.SendMessageAsync($"{User.Mention} was already deleted");
+                        return;
                     }
                     else
                     {
