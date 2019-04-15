@@ -8,7 +8,7 @@ using botTesting;
 namespace botTesting.Migrations
 {
     [DbContext(typeof(SQLiteDBContext))]
-    [Migration("20190412053027_M")]
+    [Migration("20190414060310_M")]
     partial class M
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,26 @@ namespace botTesting.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<int>("Amount");
+
+                    b.Property<int>("Item1");
+
+                    b.Property<int>("Item10");
+
+                    b.Property<int>("Item2");
+
+                    b.Property<int>("Item3");
+
+                    b.Property<int>("Item4");
+
+                    b.Property<int>("Item5");
+
+                    b.Property<int>("Item6");
+
+                    b.Property<int>("Item7");
+
+                    b.Property<int>("Item8");
+
+                    b.Property<int>("Item9");
 
                     b.HasKey("UserId");
 

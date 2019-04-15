@@ -73,6 +73,12 @@ namespace botTesting
             await Client.SetGameAsync("with your feelings");
         }
 
+        public async Task AnnounceJoinedUser(SocketGuildUser user) //Welcomes the new user
+        {
+            var channel = Client.GetChannel(565049321469509635) as SocketTextChannel; // Gets the channel to send the message in
+            await channel.SendMessageAsync($"Welcome {user.Mention} to {channel.Guild.Name}"); //Welcomes the new user
+        }
+
         private async Task Client_MessageReceived(SocketMessage MessageParam)
         {
             var Message = MessageParam as SocketUserMessage;

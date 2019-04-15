@@ -4,6 +4,7 @@ using System.Text;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace botTesting
 {
@@ -74,6 +75,15 @@ namespace botTesting
         public async Task F()
         {
             await Context.Channel.SendMessageAsync("Press F for Respects :cry:");
+        }
+        [Command("store")]
+        public async Task Store()
+        {     
+            EmbedBuilder Embed = new EmbedBuilder();
+            Embed.WithAuthor("Shop");
+            Embed.WithColor(40, 200, 150);      
+            Embed.AddField("Item 1", "1. Dog $100");
+            await Context.Channel.SendMessageAsync("", false, Embed.Build());
         }
     }
 }

@@ -40,6 +40,18 @@ namespace botTesting
                 await DbContext.SaveChangesAsync();
             }          
         }
+        public static async Task BuyDogs(ulong UserId)
+        {
+            using (var DbContext = new SQLiteDBContext())
+            {
+                              
+                Stone Dogs = DbContext.Stones.Where(x => x.UserId == UserId).FirstOrDefault();
+                Dogs.Item1++;
+                DbContext.Stones.Update(Dogs);
+                await DbContext.SaveChangesAsync();
+            }
+        }
+        //9 more methods for store
     }
 }
 

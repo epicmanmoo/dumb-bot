@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace botTesting.Currency
@@ -19,8 +20,15 @@ namespace botTesting.Currency
             {
                 if (User == null)
                 {
-                    await Context.Channel.SendMessageAsync($"You got ${Data.GetStones(Context.User.Id)}");
-                    return;
+                    if (Data.GetStones(Context.User.Id) == 0)
+                    {
+                        await Context.Channel.SendMessageAsync("Lmao, you got nothing. Broke af :joy:");
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync($"You have ${Data.GetStones(Context.User.Id)}");
+                        return;
+                    }
                 }
                 else if (User.IsBot)
                 {
@@ -42,7 +50,7 @@ namespace botTesting.Currency
             {
                 if(Amount < 0)
                 {
-                    await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...``");
+                    await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...`` if you want to take");
                     return;
                 }
                 if (User == null)
@@ -70,13 +78,7 @@ namespace botTesting.Currency
                     await Context.Channel.SendMessageAsync("How much should I give bruh?");
                     return;
                 }
-                //SocketGuildUser CheckUser = Context.User as SocketGuildUser;
-                //if (!CheckUser.GuildPermissions.Administrator)
-                //{
-                //    await Context.Channel.SendMessageAsync("You aren't admin bruh.");
-                //    return;
-                //}
-               
+
                 await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
                             
                 await Data.SaveStones(User.Id, Amount);
@@ -85,7 +87,40 @@ namespace botTesting.Currency
             [Command("take")]
             public async Task Take(IUser User = null, int Amount= 0)
             {
+                if (Amount < 0)
+                {
+                    await Context.Channel.SendMessageAsync("Use a positive value :rage: Use ``!money give ...`` if you want to give");
+                    return;
+                }
+                if (User == null)
+                {
+                    await Context.Channel.SendMessageAsync("Who tf should I take money from?");
+                    return;
+                }
+                if (User.Username.Equals("myBot"))
+                {
+                    await Context.Channel.SendMessageAsync("Tf? What are you taking away when I have nothing?");
+                    return;
+                }
+                if (User.IsBot && !User.Username.Equals("myBot"))
+                {
+                    await Context.Channel.SendMessageAsync("Stop trying to take money from robots :rage: (they don't even have any in the first place :cry:)");
+                    return;
+                }
+                if (User == Context.User)
+                {
+                    await Context.Channel.SendMessageAsync("**TF??** You can't take away money from yourself :angry: (unless you're retarded)");
+                    return;
+                }
+                if (Amount == 0)
+                {
+                    await Context.Channel.SendMessageAsync("How much should I take bruh?");
+                    return;
+                }
 
+                await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
+
+                await Data.SaveStones(User.Id, Amount);
             }
             [Command("reset")]
             public async Task Reset(IUser User = null)
@@ -117,6 +152,60 @@ namespace botTesting.Currency
                     }
                 }
             }
+            [Command("buyDogs")]
+            public async Task BuyDogs()
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone Money = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    if(Money.Amount >= 100)
+                    {
+                        Money.Amount -= 100;
+                        DbContext.Update(Money);
+                        await DbContext.SaveChangesAsync();
+                        await Context.Channel.SendMessageAsync("Bought a dog");
+                        await Data.BuyDogs(Context.User.Id);
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("You don't have enough money peasant");
+                    }
+                }
+            }
+            [Command("work")]
+            public async Task Work()
+            {                  
+                using (var DbContext = new SQLiteDBContext()) {
+                    Random Rand = new Random();
+                    string[] Jobs = {"You worked at a factory", "You worked at a hotel",
+                                "You worked as a chef", "You worked at a graveyard"}; //add more jobs
+                    int Job = Rand.Next(Jobs.Length);
+                    int Cash = Rand.Next(201) + 300;
+                    Stone GiveCash = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    GiveCash.Amount += Cash;
+                    await Context.Channel.SendMessageAsync(Jobs[Job]);    
+                    DbContext.Update(GiveCash);
+                    await DbContext.SaveChangesAsync();
+                    await Context.Channel.SendMessageAsync("You earned $" + Cash);
+                }   
+            }
+            [Command("inventory")]
+            public async Task Inventory()
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone Inv= DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    if (Inv.Item1 > 0)
+                    {
+                        EmbedBuilder Embed = new EmbedBuilder();
+                        Embed.WithAuthor("Items");
+                        Embed.WithColor(40, 200, 150);
+                        Embed.AddField("Dogs:", Inv.Item1);
+                        await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                    }
+                }
+            }
+            
         }
 
     }
