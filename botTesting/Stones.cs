@@ -10,6 +10,7 @@ namespace botTesting
         [Key]
         public ulong UserId { get; set; }
         public int Amount { get; set; }
+        public int Warnings { get; set; }
         public int Item1 { get; set; }
         public int Item2 { get; set; }
         public int Item3 { get; set; }

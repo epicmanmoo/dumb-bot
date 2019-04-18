@@ -5,6 +5,7 @@ using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
 using System.Linq;
+using Discord.WebSocket;
 
 namespace botTesting
 {
@@ -13,12 +14,17 @@ namespace botTesting
         [Command("hello")]
         public async Task Hello()
         {
-            await Context.Channel.SendMessageAsync("What do you want?");
+            Random Rand = new Random();
+            string[] HelloTexts = {"What do you want?", "Who are you",
+                                  "I don't care about you", "Bye",
+                                  "Don't bother me"};
+            int RandNum = Rand.Next(HelloTexts.Length);
+            await Context.Channel.SendMessageAsync(HelloTexts[RandNum]);
         }
         [Command("help")]
         public async Task Help()
         {
-            await Context.Channel.SendMessageAsync("``This is my Bot, here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!loop <phrase> <numoftimes>``");
+            await Context.Channel.SendMessageAsync("```Here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!loop <phrase> <numoftimes>\n!money\n!money <user>\n!money give <user> <amount>\n!money take <user> <amount>\n!store\n!money work\n!money reset <user>\n!money inventory\n!avatar\n!avatar <user>```");
         }
         [Command("fuck")]
         public async Task<RuntimeResult> Fuck([Remainder] IGuildUser OtherUser)
@@ -58,32 +64,72 @@ namespace botTesting
             }
         }
         [Command("loop")]
-        public async Task Loop(string Input = "None", int Num= 0)
+        public async Task Loop(string Input = "None", int Num = 0)
         {
-            if (!Input.Equals("None")){
-                for (int i = 0; i < Num; i++)
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator) {
+                if (!Input.Equals("None")) {
+                    for (int i = 0; i < Num; i++)
+                    {
+                        await Context.Channel.SendMessageAsync(Input);
+                    }
+                }
+                else
                 {
-                    await Context.Channel.SendMessageAsync(Input);
+                    await Context.Channel.SendMessageAsync("Include a phrase/number (surround a phrase longer than one word with quotes)");
                 }
             }
             else
             {
-                await Context.Channel.SendMessageAsync("Please include a phrase/number!");
+                await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
         [Command("F")]
         public async Task F()
         {
-            await Context.Channel.SendMessageAsync("Press F for Respects :cry:");
+            Random Ran = new Random();
+            string[] DiffTexts = {"Press F for Respects :cry:", "Drop an F :(",
+                                 "You better press F before dying", "You get one life, F away",
+                                 "F for your future", "F means Failure, which you already are"};
+            int Rand = Ran.Next(DiffTexts.Length);
+            await Context.Channel.SendMessageAsync(DiffTexts[Rand]);
         }
         [Command("store")]
         public async Task Store()
-        {     
+        {
             EmbedBuilder Embed = new EmbedBuilder();
             Embed.WithAuthor("Shop");
-            Embed.WithColor(40, 200, 150);      
+            Embed.WithColor(40, 200, 150);
             Embed.AddField("Item 1", "1. Dog $100");
             await Context.Channel.SendMessageAsync("", false, Embed.Build());
+        }
+        [Command("caps")]
+        public async Task Caps([Remainder] string Phrase = "")
+        {
+            if (!Phrase.Equals(""))
+            {
+                await Context.Channel.SendMessageAsync(Phrase.ToUpper());
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Include a message to be capitalized");
+            }
+        }
+        [Command("avatar")]
+        public async Task Avatar(IUser User = null)
+        {
+            EmbedBuilder Embed = new EmbedBuilder();
+            Embed.WithColor(255, 0, 238);
+            if (User != null)
+            {        
+                Embed.WithImageUrl(User.GetAvatarUrl());               
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            }
+            else
+            {
+                Embed.WithImageUrl(Context.User.GetAvatarUrl());
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            }
         }
     }
 }

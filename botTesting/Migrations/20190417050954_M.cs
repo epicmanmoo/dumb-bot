@@ -13,6 +13,7 @@ namespace botTesting.Migrations
                     UserId = table.Column<ulong>(nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
                     Amount = table.Column<int>(nullable: false),
+                    Warnings = table.Column<int>(nullable: false),
                     Item1 = table.Column<int>(nullable: false),
                     Item2 = table.Column<int>(nullable: false),
                     Item3 = table.Column<int>(nullable: false),

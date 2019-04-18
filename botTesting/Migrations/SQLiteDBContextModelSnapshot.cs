@@ -42,6 +42,8 @@ namespace botTesting.Migrations
 
                     b.Property<int>("Item9");
 
+                    b.Property<int>("Warnings");
+
                     b.HasKey("UserId");
 
                     b.ToTable("Stones");

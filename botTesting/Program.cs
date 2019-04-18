@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
-
+using System.Linq;
 
 namespace botTesting
 {
@@ -13,7 +13,7 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
-        
+
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
@@ -36,13 +36,37 @@ namespace botTesting
             Client.MessageReceived += Client_MessageReceived;
             await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
             Client.Ready += Client_Ready;
-            Commands.CommandExecuted += Commands_CommandExecutedAsync;          
+            Commands.CommandExecuted += Commands_CommandExecutedAsync;
+            Client.UserJoined += AnnounceJoinedUser;
             Client.Log += Client_Log;
+            Client.UserLeft += AnnounceLeavingUser;
             string Token = "NTY1MDQ4OTY5MjA2NjkzODg4.XK432A.z3Bcq5ZOsN9L_vErrmGW8hFryA8";
             await Client.LoginAsync(TokenType.Bot, Token);
             await Client.StartAsync();
             await Task.Delay(-1);
-
+            using (var DbContext = new SQLiteDBContext())
+            {
+                if (DbContext.Stones.Where(x => x.UserId == 519689963562991651).Count() < 1)
+                {
+                    DbContext.Add(new Stone
+                    {
+                        UserId = 519689963562991651,
+                        Amount = 0,
+                        Warnings = 0,
+                        Item1 = 0,
+                        Item2 = 0,
+                        Item3 = 0,
+                        Item4 = 0,
+                        Item5 = 0,
+                        Item6 = 0,
+                        Item7 = 0,
+                        Item8 = 0,
+                        Item9 = 0,
+                        Item10 = 0
+                    });
+                    await DbContext.SaveChangesAsync();
+                }
+            }
         }
 
      
@@ -73,10 +97,49 @@ namespace botTesting
             await Client.SetGameAsync("with your feelings");
         }
 
-        public async Task AnnounceJoinedUser(SocketGuildUser user) //Welcomes the new user
+        public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
-            var channel = Client.GetChannel(565049321469509635) as SocketTextChannel; // Gets the channel to send the message in
-            await channel.SendMessageAsync($"Welcome {user.Mention} to {channel.Guild.Name}"); //Welcomes the new user
+            var channel = Client.GetChannel(567602259102531594) as SocketTextChannel;
+            string[] Welcomes = {$"Another idiot named {User.Mention} has joined",
+                                $"Look out, faggot {User.Mention} joined",
+                                $"The sped train just dropped off {User.Mention}!",
+                                $"{User.Mention} arrived and is suicidal!"};
+            Random Random = new Random();
+            int Rand = Random.Next(Welcomes.Length);
+            await channel.SendMessageAsync(Welcomes[Rand]);
+            using (var DbContext = new SQLiteDBContext())
+            {
+                DbContext.Add(new Stone
+                {
+                    UserId = User.Id,
+                    Amount = 0,
+                    Warnings = 0,
+                    Item1 = 0,
+                    Item2= 0,
+                    Item3= 0,
+                    Item4= 0,
+                    Item5= 0,
+                    Item6= 0,
+                    Item7= 0,
+                    Item8= 0,
+                    Item9= 0,
+                    Item10= 0,
+
+                });
+                await DbContext.SaveChangesAsync();
+            }
+        }
+        
+        public async Task AnnounceLeavingUser(SocketGuildUser User)
+        {
+            var Channel = Client.GetChannel(567604758106472448) as SocketTextChannel;
+            await Channel.SendMessageAsync($"{User} has left");
+            using (var DbContext = new SQLiteDBContext())
+            {
+                Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                DbContext.Remove(Stone);
+                await DbContext.SaveChangesAsync();
+            }
         }
 
         private async Task Client_MessageReceived(SocketMessage MessageParam)

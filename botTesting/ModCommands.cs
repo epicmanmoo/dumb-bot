@@ -20,7 +20,7 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("You are not a bot moderator dumbass :stuck_out_tongue:");
                 return;
             }
-           
+
             if (Context.Client.Guilds.Where(x => x.Id == GuildId).Count() < 1)
             {
                 await Context.Channel.SendMessageAsync("Can't send an invite to a server I'm not in :rage:");
@@ -59,6 +59,81 @@ namespace botTesting
             else
             {
                 await Context.Channel.SendMessageAsync("Why **_THE FUCK_** would you create an invite for your server while on your **OWN** server");
+            }
+        }
+        [Command("kick")]
+        public async Task Kick(SocketGuildUser userAccount, string reason = "")
+        {
+            var user = Context.User as SocketGuildUser;
+            var role = (user as IGuildUser).Guild.Roles.FirstOrDefault(x => x.Name == "Owner");
+            if (!(userAccount.Roles.Contains(role)))
+            {
+                if (user.Roles.Contains(role))
+                {
+                    if (!(reason.Equals("")))
+                    {
+                        try
+                        {
+                            await Discord.UserExtensions.SendMessageAsync(userAccount, $"Your dumbass got kicked :joy: Reason: {reason}");
+                            await userAccount.KickAsync();
+                        }
+                        catch (Discord.Net.HttpException Ex)
+                        {
+                            Console.WriteLine(Ex.Message);
+                        }                      
+                        await Context.Channel.SendMessageAsync($"`{userAccount}` has been kicked. Reason: `{reason}`");              
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Include reason to kick :rolling_eyes:");
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Not a mod spedboi");
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Admins can't be kicked dumbass");
+            }
+        }
+        [Command("warn")]
+        public async Task Warn(IGuildUser OtherUser, string reason ="")
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    if (!reason.Equals(""))
+                    {
+                        Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
+                        if (WarningUpdate.Warnings == 5)
+                        {
+                            IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
+                            await OtherUser.AddRoleAsync(Role);
+                            WarningUpdate.Warnings = 0;
+                            DbContext.Update(WarningUpdate);
+                            await DbContext.SaveChangesAsync();
+                        }
+                        else
+                        {
+                            WarningUpdate.Warnings++;
+                            await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has been warned. Warning: {reason}. Warning #{WarningUpdate.Warnings}");
+                            DbContext.Update(WarningUpdate);
+                            await DbContext.SaveChangesAsync();
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Enter a reason to warn specified user");
+                    }
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
     }
