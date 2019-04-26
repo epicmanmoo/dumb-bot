@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Discord.WebSocket;
 using Discord;
+using System.Threading;
 
 namespace botTesting
 {
@@ -99,36 +100,120 @@ namespace botTesting
             }
         }
         [Command("warn")]
-        public async Task Warn(IGuildUser OtherUser, string reason ="")
+        public async Task Warn(IGuildUser OtherUser, [Remainder] string reason ="")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    if(DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
+                    {
+                        DbContext.Add(new Stone
+                        {
+                            UserId = OtherUser.Id,
+                            Amount = 0,
+                            Warnings = 0,
+                            Item1 = 0,
+                            Item2 = 0,
+                            Item3 = 0,
+                            Item4 = 0,
+                            Item5 = 0,
+                            Item6 = 0,
+                            Item7 = 0,
+                            Item8 = 0,
+                            Item9 = 0,
+                            Item10 = 0,
+
+                        });
+                        await DbContext.SaveChangesAsync();
+                    }            
                     if (!reason.Equals(""))
                     {
-                        Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
-                        if (WarningUpdate.Warnings == 5)
+                        Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();    
+                        WarningUpdate.Warnings++;
+                        if(WarningUpdate.Warnings == 5)
                         {
                             IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
                             await OtherUser.AddRoleAsync(Role);
                             WarningUpdate.Warnings = 0;
                             DbContext.Update(WarningUpdate);
+                            await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has been muted");
                             await DbContext.SaveChangesAsync();
+                            return;
                         }
-                        else
-                        {
-                            WarningUpdate.Warnings++;
-                            await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has been warned. Warning: {reason}. Warning #{WarningUpdate.Warnings}");
-                            DbContext.Update(WarningUpdate);
-                            await DbContext.SaveChangesAsync();
-                        }
+                        await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has been warned. Warning: {reason}. Warning #{WarningUpdate.Warnings}");
+                        DbContext.Update(WarningUpdate);
+                        await DbContext.SaveChangesAsync();
                     }
                     else
                     {
                         await Context.Channel.SendMessageAsync("Enter a reason to warn specified user");
                     }
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Not a mod retard");
+            }
+        }
+        [Command("clearwarn")]
+        public async Task ClearWarn(SocketGuildUser User)
+        {
+            //clears warnings from database
+        }
+        [Command("mute")]
+        public async Task Mute(SocketGuildUser OtherUser)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");                      
+                if (!OtherUser.Roles.Contains(Role))
+                {
+                    if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
+                    {
+                        await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
+                        await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                        await Context.Channel.SendMessageAsync(":x: Repeat command");
+                        await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
+                        return;
+                    }
+                    await OtherUser.AddRoleAsync(Role);
+                    try
+                    {
+                        await Discord.UserExtensions.SendMessageAsync(OtherUser, "You have been muted on " + Context.Guild.Name);
+                    }
+                    catch (Discord.Net.HttpException Ex)
+                    {
+                        Console.WriteLine(Ex.Message);
+                    }
+                    await Context.Channel.SendMessageAsync($"Muted {OtherUser.Mention}");
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync($"{OtherUser.Mention} is already muted");
+                    return;
+                }
+            }
+        }
+        [Command("loop")]
+        public async Task Loop(string Input = "", int Num = 0)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (!Input.Equals(""))
+                {
+                    for (int i = 0; i < Num; i++)
+                    {
+                        await Context.Channel.SendMessageAsync(Input);
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Include a phrase/number bruh");
                 }
             }
             else

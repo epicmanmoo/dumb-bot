@@ -51,41 +51,49 @@ namespace botTesting.Currency
             [Command("give")]
             public async Task Give(IUser User= null, int Amount= 0)
             {
-                if(Amount < 0)
+                using (var DbContext = new SQLiteDBContext())
                 {
-                    await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...`` if you want to take");
-                    return;
-                }
-                if (User == null)
-                {
-                    await Context.Channel.SendMessageAsync("Who tf should I give money to?");
-                    return;
-                }
-                if (User.Username.Equals("myBot"))
-                {
-                    await Context.Channel.SendMessageAsync("Tf? What do you want me to do with money?");
-                    return;
-                }
-                if (User.IsBot && !User.Username.Equals("myBot"))
-                {
-                    await Context.Channel.SendMessageAsync("Stop trying to give money to robots :rage:");
-                    return;
-                }
-                if (User == Context.User)
-                {
-                    await Context.Channel.SendMessageAsync("**TF??** You can't give money to yourself :angry:");
-                    return;
-                }
-                if (Amount == 0)
-                {
-                    await Context.Channel.SendMessageAsync("How much should I give bruh?");
-                    return;
-                }
+                    Stone sMoney = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    int Money = sMoney.Amount;
+                    if (!(Money < Amount))
+                    {
+                        if (Amount < 0)
+                        {
+                            await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...`` if you want to take");
+                            return;
+                        }
+                        if (User == null)
+                        {
+                            await Context.Channel.SendMessageAsync("Who tf should I give money to?");
+                            return;
+                        }
+                        if (User.Username.Equals("myBot"))
+                        {
+                            await Context.Channel.SendMessageAsync("Tf? What do you want me to do with money?");
+                            return;
+                        }
+                        if (User.IsBot && !User.Username.Equals("myBot"))
+                        {
+                            await Context.Channel.SendMessageAsync("Stop trying to give money to robots :rage:");
+                            return;
+                        }
+                        if (User == Context.User)
+                        {
+                            await Context.Channel.SendMessageAsync("**TF??** You can't give money to yourself :angry:");
+                            return;
+                        }
+                        if (Amount == 0)
+                        {
+                            await Context.Channel.SendMessageAsync("How much should I give bruh?");
+                            return;
+                        }
 
-                await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
-                            
-                await Data.SaveStones(User.Id, Amount);
-               
+                        await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
+                        await Data.SaveStones(User.Id, Amount);
+                        return;
+                    }
+                    await Context.Channel.SendMessageAsync("You do not enough money to send");
+                }
             }
             [Command("take")]
             public async Task Take(IUser User = null, int Amount= 0)
@@ -180,6 +188,7 @@ namespace botTesting.Currency
                     }
                 }
             }
+            //9 more methods for store
             [Command("work")]
             public async Task Work()
             {
@@ -220,8 +229,18 @@ namespace botTesting.Currency
                         EmbedBuilder Embed = new EmbedBuilder();
                         Embed.WithAuthor("Items");
                         Embed.WithColor(40, 200, 150);
-                        Embed.AddField("Dogs:", Inv.Item1);
-                        await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                        if(Inv.Item1 == 1)
+                        {
+                            Embed.AddField("Dog:", Inv.Item1);
+                            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                            return;
+                        }
+                        else
+                        {
+                            Embed.AddField("Dogs:", Inv.Item1);
+                            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                        }
+                        
                     }
                 }
             }

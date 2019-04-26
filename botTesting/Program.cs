@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace botTesting
 {
-    class Program
+    class Program : ModuleBase<SocketCommandContext>
     {
 
         private DiscordSocketClient Client;
@@ -23,7 +23,8 @@ namespace botTesting
         {
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
-                LogLevel = LogSeverity.Debug
+                LogLevel = LogSeverity.Debug,
+                MessageCacheSize = 1000
             });
 
             Commands = new CommandService(new CommandServiceConfig
@@ -72,19 +73,15 @@ namespace botTesting
      
         private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
-            switch (result)
+            if (result.Error.Equals(CommandError.ParseFailed))
             {
-                case Errors errors:
-                    //do stuff with errors
-                    break;
-                default:
-                    if (!string.IsNullOrEmpty(result?.ErrorReason))
-                    {
-                        await context.Channel.SendMessageAsync(result.ErrorReason);
-                    }
-                    break;
+                await context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
             }
-            
+
+            else if (result.Error.Equals(CommandError.ObjectNotFound))
+            {
+                await context.Channel.SendMessageAsync("That user doesn't exist dumbass");  
+            }
         }
 
         private async Task Client_Log(LogMessage Message)
@@ -95,11 +92,12 @@ namespace botTesting
         private async Task Client_Ready()
         {
             await Client.SetGameAsync("with your feelings");
+
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
-        {
-            var channel = Client.GetChannel(567602259102531594) as SocketTextChannel;
+        { 
+            var channel = Client.GetChannel(567602259102531594) as SocketTextChannel;           
             string[] Welcomes = {$"Another idiot named {User.Mention} has joined",
                                 $"Look out, faggot {User.Mention} joined",
                                 $"The sped train just dropped off {User.Mention}!",

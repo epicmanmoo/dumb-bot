@@ -24,10 +24,10 @@ namespace botTesting
         [Command("help")]
         public async Task Help()
         {
-            await Context.Channel.SendMessageAsync("```Here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!loop <phrase> <numoftimes>\n!money\n!money <user>\n!money give <user> <amount>\n!money take <user> <amount>\n!store\n!money work\n!money reset <user>\n!money inventory\n!avatar\n!avatar <user>```");
+            await Context.Channel.SendMessageAsync("```Here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!loop <phrase> <numoftimes> (surround phrases longer than one word in quotes)\n!money\n!money <user>\n!money give <user> <amount>\n!money take <user> <amount>\n!store\n!money work\n!money reset <user>\n!money inventory\n!avatar\n!avatar <user>```");
         }
         [Command("fuck")]
-        public async Task<RuntimeResult> Fuck([Remainder] IGuildUser OtherUser)
+        public async Task Fuck([Remainder] IGuildUser OtherUser)
         {
             if (Context.User.Equals(OtherUser))
             {
@@ -37,12 +37,11 @@ namespace botTesting
             {
                 await Context.Channel.SendMessageAsync("No, fuck **_you_**");
             }
-            else if (!OtherUser.Equals(Context.User))
+            else
             {
                 await Context.Channel.SendMessageAsync(Context.User.Mention + " says fuck you to " + OtherUser.Mention);
             }
-            return Errors.FromError("User Not Found");
-        }
+         }
 
         [Command("embed")]
         public async Task Embed([Remainder] string Input = "")
@@ -61,27 +60,6 @@ namespace botTesting
             else
             {
                 await Context.Channel.SendMessageAsync("Please include a phrase!");
-            }
-        }
-        [Command("loop")]
-        public async Task Loop(string Input = "None", int Num = 0)
-        {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator) {
-                if (!Input.Equals("None")) {
-                    for (int i = 0; i < Num; i++)
-                    {
-                        await Context.Channel.SendMessageAsync(Input);
-                    }
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("Include a phrase/number (surround a phrase longer than one word with quotes)");
-                }
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
         [Command("F")]
@@ -121,8 +99,13 @@ namespace botTesting
             EmbedBuilder Embed = new EmbedBuilder();
             Embed.WithColor(255, 0, 238);
             if (User != null)
-            {        
-                Embed.WithImageUrl(User.GetAvatarUrl());               
+            {
+                if(User.GetAvatarUrl() == null)
+                {
+                    await Context.Channel.SendMessageAsync("No PFP for this user");
+                    return;
+                }
+                Embed.WithImageUrl(User.GetAvatarUrl());
                 await Context.Channel.SendMessageAsync("", false, Embed.Build());
             }
             else
