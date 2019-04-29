@@ -79,8 +79,8 @@ namespace botTesting
                         catch (Discord.Net.HttpException Ex)
                         {
                             Console.WriteLine(Ex.Message);
-                        }                      
-                        await Context.Channel.SendMessageAsync($"`{userAccount}` has been kicked. Reason: `{reason}`");              
+                        }
+                        await Context.Channel.SendMessageAsync($"`{userAccount}` has been kicked. Reason: `{reason}`");
                     }
                     else
                     {
@@ -98,15 +98,15 @@ namespace botTesting
             }
         }
         [Command("warn")]
-        public async Task Warn(SocketGuildUser OtherUser, [Remainder] string reason ="")
+        public async Task Warn(SocketGuildUser OtherUser, [Remainder] string reason = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-                
+
                 using (var DbContext = new SQLiteDBContext())
                 {
-                    if(DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
+                    if (DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
                     {
                         DbContext.Add(new Stone
                         {
@@ -126,7 +126,7 @@ namespace botTesting
 
                         });
                         await DbContext.SaveChangesAsync();
-                    }            
+                    }
                     if (!reason.Equals(""))
                     {
                         Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
@@ -137,7 +137,7 @@ namespace botTesting
                             return;
                         }
                         WarningUpdate.Warnings++;
-                        if(WarningUpdate.Warnings == 5)
+                        if (WarningUpdate.Warnings == 5)
                         {
                             IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
                             await MuteRole();
@@ -188,7 +188,7 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Stone Warnings = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
-                    if(Warnings.Warnings == 1)
+                    if (Warnings.Warnings == 1)
                     {
                         await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has " + Warnings.Warnings + " Warning");
                         return;
@@ -206,7 +206,7 @@ namespace botTesting
                 IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
                 if (!OtherUser.Roles.Contains(Role))
                 {
-                    await MuteRole();   
+                    await MuteRole();
                     await OtherUser.AddRoleAsync(Role);
                     try
                     {
@@ -271,7 +271,7 @@ namespace botTesting
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-                await Context.Channel.SendMessageAsync($"{OtherUser} was banned"); 
+                await Context.Channel.SendMessageAsync($"{OtherUser} was banned");
                 await OtherUser.BanAsync();
             }
         }
@@ -327,24 +327,28 @@ namespace botTesting
             }
         }
         [Command("clearjoinmsgs")]
-        public async Task ClearJoinMsgs(int index = 0)
+        public async Task ClearJoinMsgs(string index = "0")
         {
+            int parsedIndex = Int32.Parse(index);
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-                if (index > 0)
+                if (parsedIndex > 0)
                 {
-                    Program.JoinMsgList.RemoveAt(index - 1);
-                    await Context.Channel.SendMessageAsync("Message removed");
+                    Program.JoinMsgList.RemoveAt(parsedIndex - 1);
+                    await Context.Channel.SendMessageAsync("Join message removed");
                     return;
                 }
-                else
+                else if (parsedIndex < 0 || parsedIndex == 0)
                 {
                     await Context.Channel.SendMessageAsync("Enter a valid index");
                     return;
                 }
-                Program.JoinMsgList.Clear();
-                await Context.Channel.SendMessageAsync("All messages removed!");
+                else if (index.Equals("all"))
+                {
+                    Program.JoinMsgList.Clear();
+                    await Context.Channel.SendMessageAsync("All messages removed!");
+                }
             }
         }
         [Command("joinmsgs")]
@@ -362,7 +366,6 @@ namespace botTesting
                 }
                 for (int i = 0; i < Program.JoinMsgList.Count; i++)
                 {
-                    //await Context.Channel.SendMessageAsync(Program.MsgList[i]);              
                     Embed.WithColor(40, 200, 150);
                     Embed.AddField("Index " + (i + 1) + ":", "• " + Program.JoinMsgList[i]);
                 }
@@ -385,7 +388,37 @@ namespace botTesting
                 }
             }
         }
-        [Command("")]
-        //methods for leaving messages
+        [Command("leavemsgs")]
+        public async Task LeaveMsgs()
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                EmbedBuilder Embed = new EmbedBuilder();
+                Embed.WithTitle("**Leave Messages**");
+                if (Program.JoinMsgList.Count == 0)
+                {
+                    await Context.Channel.SendMessageAsync("No leave messages in list");
+                    return;
+                }
+                for (int i = 0; i < Program.LeaveMsgList.Count; i++)
+                {
+                    Embed.WithColor(40, 200, 150);
+                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.LeaveMsgList[i]);
+                }
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            }
+        }
+        [Command("addleavemsg")]
+        public async Task AddLeaveMsg([Remainder] string msg = "")
+        {
+
+        }
+        [Command("clearleavemsgs")]
+        public async Task ClearLeaveMsgs(int index = 0)
+        {
+
+        }
+
     }
 }

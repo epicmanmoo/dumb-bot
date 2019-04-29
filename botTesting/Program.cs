@@ -75,6 +75,7 @@ namespace botTesting
      
         private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
         {
+            //Make better error messages so user knows what he did wrong
             if (result.Error.Equals(CommandError.ParseFailed))
             {
                 await context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
@@ -134,8 +135,10 @@ namespace botTesting
         
         public async Task AnnounceLeavingUser(SocketGuildUser User)
         {
-            var Channel = Client.GetChannel(567604758106472448) as SocketTextChannel;
-            //await Channel.SendMessageAsync($"{User} has left");
+            //567604758106472448
+            var Channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
+            Random Rand = new Random();
+            await Channel.SendMessageAsync($"{User} has left. " );
             using (var DbContext = new SQLiteDBContext())
             {
                 Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
