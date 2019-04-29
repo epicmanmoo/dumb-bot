@@ -14,8 +14,8 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
-        public static List<string> MsgList = new List<string>();
-
+        public static List<string> JoinMsgList = new List<string>();
+        public static List<string> LeaveMsgList = new List<string>();
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
@@ -107,8 +107,8 @@ namespace botTesting
             //567602259102531594
             var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;           
             Random Random = new Random();
-            int Rand = Random.Next(MsgList.Count);
-            await channel.SendMessageAsync($"{User.Mention} has joined! " + MsgList[Rand]); 
+            int Rand = Random.Next(JoinMsgList.Count);
+            await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand]); 
             using (var DbContext = new SQLiteDBContext())
             {
                 DbContext.Add(new Stone

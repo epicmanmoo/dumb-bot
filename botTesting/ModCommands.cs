@@ -321,7 +321,7 @@ namespace botTesting
             {
                 if (!msg.Equals(""))
                 {
-                    Program.MsgList.Add(msg);
+                    Program.JoinMsgList.Add(msg);
                     await Context.Channel.SendMessageAsync("Message added to list");
                 }
             }
@@ -334,15 +334,16 @@ namespace botTesting
             {
                 if (index > 0)
                 {
-                    Program.MsgList.RemoveAt(index - 1);
+                    Program.JoinMsgList.RemoveAt(index - 1);
                     await Context.Channel.SendMessageAsync("Message removed");
                     return;
                 }
                 else
                 {
                     await Context.Channel.SendMessageAsync("Enter a valid index");
+                    return;
                 }
-                Program.MsgList.Clear();
+                Program.JoinMsgList.Clear();
                 await Context.Channel.SendMessageAsync("All messages removed!");
             }
         }
@@ -353,16 +354,17 @@ namespace botTesting
             if (User.GuildPermissions.Administrator)
             {
                 EmbedBuilder Embed = new EmbedBuilder();
-                if (Program.MsgList.Count == 0)
+                Embed.WithTitle("**Join Messages**");
+                if (Program.JoinMsgList.Count == 0)
                 {
                     await Context.Channel.SendMessageAsync("No join messages in list");
                     return;
                 }
-                for (int i = 0; i < Program.MsgList.Count; i++)
+                for (int i = 0; i < Program.JoinMsgList.Count; i++)
                 {
                     //await Context.Channel.SendMessageAsync(Program.MsgList[i]);              
                     Embed.WithColor(40, 200, 150);
-                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.MsgList[i]);
+                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.JoinMsgList[i]);
                 }
                 await Context.Channel.SendMessageAsync("", false, Embed.Build());
             }
@@ -373,9 +375,17 @@ namespace botTesting
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-
+                if (!Msg.Equals(""))
+                {
+                    if (index > 0)
+                    {
+                        Program.JoinMsgList[index - 1] = Msg;
+                        await Context.Channel.SendMessageAsync("Updated join message at index " + index);
+                    }
+                }
             }
         }
+        [Command("")]
         //methods for leaving messages
     }
 }
