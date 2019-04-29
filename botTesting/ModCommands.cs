@@ -311,6 +311,8 @@ namespace botTesting
             }
             await Role.ModifyAsync(x => x.Position = Temp.Position);
         }
+        //If you only want one join message then only add one.
+        //Adding multiple will result in a random selection from the amount of messages in the list.
         [Command("addjoinmsg")]
         public async Task SetJoinMsg([Remainder] string msg = "")
         {
@@ -366,7 +368,7 @@ namespace botTesting
             }
         }
         [Command("editjoinmsgs")]
-        public async Task EditJoinMsgs(int index = 0)
+        public async Task EditJoinMsgs(int index = 0, [Remainder] string Msg = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
