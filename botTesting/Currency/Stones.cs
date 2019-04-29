@@ -4,8 +4,6 @@ using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace botTesting.Currency
@@ -13,8 +11,8 @@ namespace botTesting.Currency
 
     public class Stones : ModuleBase<SocketCommandContext>
     {
-        public static List<DateTimeOffset> stackCooldownTimer = new List<DateTimeOffset>();
-        public static List<SocketGuildUser> stackCooldownTarget = new List<SocketGuildUser>();
+        public static List<DateTimeOffset> workTimer = new List<DateTimeOffset>();
+        public static List<SocketGuildUser> workTarget = new List<SocketGuildUser>();
         [Group("money")]
         public class StonesGroup : ModuleBase<SocketCommandContext>
         {
@@ -98,37 +96,7 @@ namespace botTesting.Currency
             [Command("take")]
             public async Task Take(IUser User = null, int Amount= 0)
             {
-                if (Amount < 0)
-                {
-                    await Context.Channel.SendMessageAsync("Use a positive value :rage: Use ``!money give ...`` if you want to give");
-                    return;
-                }
-                if (User == null)
-                {
-                    await Context.Channel.SendMessageAsync("Who tf should I take money from?");
-                    return;
-                }
-                if (User.Username.Equals("myBot"))
-                {
-                    await Context.Channel.SendMessageAsync("Tf? What are you taking away when I have nothing?");
-                    return;
-                }
-                if (User.IsBot && !User.Username.Equals("myBot"))
-                {
-                    await Context.Channel.SendMessageAsync("Stop trying to take money from robots :rage: (they don't even have any in the first place :cry:)");
-                    return;
-                }
-                if (User == Context.User)
-                {
-                    await Context.Channel.SendMessageAsync("**TF??** You can't take away money from yourself :angry: (unless you're retarded)");
-                    return;
-                }
-                if (Amount == 0)
-                {
-                    await Context.Channel.SendMessageAsync("How much should I take bruh?");
-                    return;
-                }
-
+                //method to have a chance of successfully stealing money or not from said user
                 await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
 
                 await Data.SaveStones(User.Id, Amount);
@@ -188,32 +156,32 @@ namespace botTesting.Currency
                     }
                 }
             }
-            //9 more methods for store
+            //9 more methods for store!!
             [Command("work")]
             public async Task Work()
             {
-                if (stackCooldownTarget.Contains(Context.User as SocketGuildUser))
+                if (workTarget.Contains(Context.User as SocketGuildUser))
                 {
-                    if (stackCooldownTimer[stackCooldownTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) >= DateTimeOffset.Now)
+                    if (workTimer[workTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) >= DateTimeOffset.Now)
                     {
-                        int secondsLeft = (int)(stackCooldownTimer[stackCooldownTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) - DateTimeOffset.Now).TotalSeconds;
+                        int secondsLeft = (int)(workTimer[workTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) - DateTimeOffset.Now).TotalSeconds;
                         EmbedBuilder Embed = new EmbedBuilder();
                         Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
                         Embed.WithColor(40, 200, 150);
-                        Embed.WithDescription($"Wait {secondsLeft} more seconds before working dumbass");
+                        Embed.WithDescription($":x: Wait {secondsLeft} more seconds before working dumbass");
                         await Context.Channel.SendMessageAsync("", false, Embed.Build());
                         return;
                     }
                     else
                     {
-                        stackCooldownTimer[stackCooldownTarget.IndexOf(Context.Message.Author as SocketGuildUser)] = DateTimeOffset.Now;
+                        workTimer[workTarget.IndexOf(Context.Message.Author as SocketGuildUser)] = DateTimeOffset.Now;
                         await WorkMethod();
                     }
                 }
                 else
                 {
-                    stackCooldownTarget.Add(Context.User as SocketGuildUser);
-                    stackCooldownTimer.Add(DateTimeOffset.Now);
+                    workTarget.Add(Context.User as SocketGuildUser);
+                    workTimer.Add(DateTimeOffset.Now);
                     await WorkMethod();
                 }
                 
@@ -264,6 +232,7 @@ namespace botTesting.Currency
                     await DbContext.SaveChangesAsync();
                 }
             }
+            //add more "weird" jobs or ways to earn money
             
         }
 

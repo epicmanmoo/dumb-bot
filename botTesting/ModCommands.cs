@@ -1,12 +1,10 @@
 ﻿using Discord.Commands;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using System.Linq;
 using Discord.WebSocket;
 using Discord;
-using System.Threading;
 
 namespace botTesting
 {
@@ -63,7 +61,7 @@ namespace botTesting
             }
         }
         [Command("kick")]
-        public async Task Kick(SocketGuildUser userAccount, string reason = "")
+        public async Task Kick(SocketGuildUser userAccount, [Remainder] string reason = "")
         {
             var user = Context.User as SocketGuildUser;
             var role = (user as IGuildUser).Guild.Roles.FirstOrDefault(x => x.Name == "Owner");
@@ -75,7 +73,7 @@ namespace botTesting
                     {
                         try
                         {
-                            await Discord.UserExtensions.SendMessageAsync(userAccount, $"Your dumbass got kicked :joy: Reason: {reason}");
+                            await UserExtensions.SendMessageAsync(userAccount, $"Your dumbass got kicked :joy: Reason: {reason}");
                             await userAccount.KickAsync();
                         }
                         catch (Discord.Net.HttpException Ex)
@@ -100,11 +98,12 @@ namespace botTesting
             }
         }
         [Command("warn")]
-        public async Task Warn(IGuildUser OtherUser, [Remainder] string reason ="")
+        public async Task Warn(SocketGuildUser OtherUser, [Remainder] string reason ="")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
+                
                 using (var DbContext = new SQLiteDBContext())
                 {
                     if(DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
@@ -130,11 +129,18 @@ namespace botTesting
                     }            
                     if (!reason.Equals(""))
                     {
-                        Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();    
+                        Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
+                        int CheckWarning = OtherUser.Roles.Count(x => x.Name == "muted");
+                        if (CheckWarning == 1)
+                        {
+                            await Context.Channel.SendMessageAsync($"{OtherUser.Mention} is already muted");
+                            return;
+                        }
                         WarningUpdate.Warnings++;
                         if(WarningUpdate.Warnings == 5)
                         {
                             IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
+                            await MuteRole();
                             await OtherUser.AddRoleAsync(Role);
                             WarningUpdate.Warnings = 0;
                             DbContext.Update(WarningUpdate);
@@ -157,10 +163,39 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
-        [Command("clearwarn")]
-        public async Task ClearWarn(SocketGuildUser User)
+        [Command("clearwarns")]
+        public async Task ClearWarn(SocketGuildUser OtherUser)
         {
-            //clears warnings from database
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone Warnings = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
+                    Warnings.Warnings = 0;
+                    DbContext.Update(Warnings);
+                    await DbContext.SaveChangesAsync();
+                    await Context.Channel.SendMessageAsync($"Clearned warnings for {OtherUser.Mention}");
+                }
+            }
+        }
+        [Command("warns")]
+        public async Task Warns(SocketGuildUser OtherUser)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone Warnings = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
+                    if(Warnings.Warnings == 1)
+                    {
+                        await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has " + Warnings.Warnings + " Warning");
+                        return;
+                    }
+                    await Context.Channel.SendMessageAsync($"{OtherUser.Mention} has " + Warnings.Warnings + " Warnings");
+                }
+            }
         }
         [Command("mute")]
         public async Task Mute(SocketGuildUser OtherUser)
@@ -168,21 +203,14 @@ namespace botTesting
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-                IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");                      
+                IRole Role = OtherUser.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
                 if (!OtherUser.Roles.Contains(Role))
                 {
-                    if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
-                    {
-                        await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
-                        await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
-                        await Context.Channel.SendMessageAsync(":x: Repeat command");
-                        await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
-                        return;
-                    }
+                    await MuteRole();   
                     await OtherUser.AddRoleAsync(Role);
                     try
                     {
-                        await Discord.UserExtensions.SendMessageAsync(OtherUser, "You have been muted on " + Context.Guild.Name);
+                        await UserExtensions.SendMessageAsync(OtherUser, "You have been muted on " + Context.Guild.Name);
                     }
                     catch (Discord.Net.HttpException Ex)
                     {
@@ -196,6 +224,22 @@ namespace botTesting
                     await Context.Channel.SendMessageAsync($"{OtherUser.Mention} is already muted");
                     return;
                 }
+            }
+        }
+        [Command("unmute")]
+        public async Task UnMute(SocketGuildUser OtherUser)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            IRole Role = OtherUser.Roles.FirstOrDefault(x => x.Name == "muted");
+            if (User.GuildPermissions.Administrator)
+            {
+                if (OtherUser.Roles.Contains(Role))
+                {
+                    await OtherUser.RemoveRoleAsync(Role);
+                    await Context.Channel.SendMessageAsync($"Unmuted {OtherUser.Mention}");
+                    return;
+                }
+                await Context.Channel.SendMessageAsync("User is not muted");
             }
         }
         [Command("loop")]
@@ -221,5 +265,115 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
+        [Command("ban")]//make it better, send user a message for why, etc.
+        public async Task Ban(SocketGuildUser OtherUser)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                await Context.Channel.SendMessageAsync($"{OtherUser} was banned"); 
+                await OtherUser.BanAsync();
+            }
+        }
+        public async Task MuteRole()
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            IRole Role = User.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
+            if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
+            {
+                await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
+                await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                await Context.Channel.SendMessageAsync(":x: Repeat command");
+                await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
+                return;
+            }
+            IEnumerable<SocketRole> Roles = Context.Guild.Roles;
+            SocketRole[] SortingArr = Roles.OrderByDescending(x => x.Position).ToArray();
+            int IndexOfMuted = 0;
+            SocketRole Temp = SortingArr[0];
+            for (int i = 0; i < SortingArr.Length; i++)
+            {
+                if (SortingArr[i].ToString().Equals("muted"))
+                {
+                    IndexOfMuted = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < SortingArr.Length; i++)
+            {
+                if (SortingArr[i].IsManaged)
+                {
+                    Temp = SortingArr[i];
+                    SortingArr[i] = SortingArr[IndexOfMuted];
+                    SortingArr[IndexOfMuted] = Temp;
+                    break;
+                }
+            }
+            await Role.ModifyAsync(x => x.Position = Temp.Position);
+        }
+        [Command("addjoinmsg")]
+        public async Task SetJoinMsg([Remainder] string msg = "")
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (!msg.Equals(""))
+                {
+                    Program.MsgList.Add(msg);
+                    await Context.Channel.SendMessageAsync("Message added to list");
+                }
+            }
+        }
+        [Command("clearjoinmsgs")]
+        public async Task ClearJoinMsgs(int index = 0)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (index > 0)
+                {
+                    Program.MsgList.RemoveAt(index - 1);
+                    await Context.Channel.SendMessageAsync("Message removed");
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a valid index");
+                }
+                Program.MsgList.Clear();
+                await Context.Channel.SendMessageAsync("All messages removed!");
+            }
+        }
+        [Command("joinmsgs")]
+        public async Task ShowJoinMsgs()
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                EmbedBuilder Embed = new EmbedBuilder();
+                if (Program.MsgList.Count == 0)
+                {
+                    await Context.Channel.SendMessageAsync("No join messages in list");
+                    return;
+                }
+                for (int i = 0; i < Program.MsgList.Count; i++)
+                {
+                    //await Context.Channel.SendMessageAsync(Program.MsgList[i]);              
+                    Embed.WithColor(40, 200, 150);
+                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.MsgList[i]);
+                }
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            }
+        }
+        [Command("editjoinmsgs")]
+        public async Task EditJoinMsgs(int index = 0)
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+
+            }
+        }
+        //methods for leaving messages
     }
 }

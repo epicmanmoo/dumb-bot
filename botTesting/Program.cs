@@ -5,6 +5,7 @@ using Discord;
 using Discord.WebSocket;
 using Discord.Commands;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace botTesting
 {
@@ -13,6 +14,7 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
+        public static List<string> MsgList = new List<string>();
 
         static void Main(string[] args)
         {
@@ -82,6 +84,11 @@ namespace botTesting
             {
                 await context.Channel.SendMessageAsync("That user doesn't exist dumbass");  
             }
+            else if (result.Error.Equals(CommandError.BadArgCount))
+            {
+                //error for this type
+            }
+            //etc errors...
         }
 
         private async Task Client_Log(LogMessage Message)
@@ -96,15 +103,12 @@ namespace botTesting
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
-        { 
-            var channel = Client.GetChannel(567602259102531594) as SocketTextChannel;           
-            string[] Welcomes = {$"Another idiot named {User.Mention} has joined",
-                                $"Look out, faggot {User.Mention} joined",
-                                $"The sped train just dropped off {User.Mention}!",
-                                $"{User.Mention} arrived and is suicidal!"};
+        {
+            //567602259102531594
+            var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;           
             Random Random = new Random();
-            int Rand = Random.Next(Welcomes.Length);
-            await channel.SendMessageAsync(Welcomes[Rand]);
+            int Rand = Random.Next(MsgList.Count);
+            await channel.SendMessageAsync($"{User.Mention} has joined! " + MsgList[Rand]); 
             using (var DbContext = new SQLiteDBContext())
             {
                 DbContext.Add(new Stone
@@ -131,7 +135,7 @@ namespace botTesting
         public async Task AnnounceLeavingUser(SocketGuildUser User)
         {
             var Channel = Client.GetChannel(567604758106472448) as SocketTextChannel;
-            await Channel.SendMessageAsync($"{User} has left");
+            //await Channel.SendMessageAsync($"{User} has left");
             using (var DbContext = new SQLiteDBContext())
             {
                 Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();

@@ -72,7 +72,7 @@ namespace botTesting
             int Rand = Ran.Next(DiffTexts.Length);
             await Context.Channel.SendMessageAsync(DiffTexts[Rand]);
         }
-        [Command("store")]
+        [Command("store")]//more shop items!!
         public async Task Store()
         {
             EmbedBuilder Embed = new EmbedBuilder();

@@ -51,7 +51,7 @@ namespace botTesting
                 await DbContext.SaveChangesAsync();
             }
         }
-        //9 more methods for store
+        //9 more methods for store!!
     }
 }
 
