@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Linq;
 using Discord.WebSocket;
 using Discord;
+using Discord.Rest;
 
 namespace botTesting
 {
@@ -327,7 +328,10 @@ namespace botTesting
                         return;
                     }
                     Program.JoinMsgList.Add(msg);
-                    await Context.Channel.SendMessageAsync("``" + msg + "``"+ " added to join message list");
+                    //RestUserMessage Message = await Context.Channel.SendMessageAsync("``" + msg + "``" + " added to join message list");
+                    //Emoji d = new Emoji("\U0001f602");
+                    //await Message.AddReactionAsync(d);
+                    await Context.Channel.SendMessageAsync("``" + msg + "``" + " added to join message list");
                 }
             }
         }
