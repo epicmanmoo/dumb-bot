@@ -16,6 +16,7 @@ namespace botTesting
         private CommandService Commands;
         public static List<string> JoinMsgList = new List<string>();
         public static List<string> LeaveMsgList = new List<string>();
+        public static string prefix = "!";
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
@@ -79,20 +80,30 @@ namespace botTesting
             if (result.Error.Equals(CommandError.ParseFailed))
             {
                 SocketGuildUser User = Context.User as SocketGuildUser;
-                if (command.Value.Name.Equals("loop"))
+                if (User.GuildPermissions.Administrator)
                 {
-                    if (User.GuildPermissions.Administrator)
+                    if (command.Value.Name.Equals("loop"))
                     {
                         await Context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
                         return;
                     }
-                    else
+                    if (command.Value.Name.Equals("setmsgprefix"))
                     {
-                        await Context.Channel.SendMessageAsync("Not a mod retard");
+                        await Context.Channel.SendMessageAsync("Enter a valid prefix!");
+                        return;
                     }
                 }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Not a mod retard");
+                }
             }
-
+            else if (result.Error.Equals(CommandError.UnknownCommand))
+            {
+                //Maybe make it so that if a command is spelled incorrectly but is similar to a command
+                //that exists then tell the user the right way to type the command?
+                await Context.Channel.SendMessageAsync("That command does not exist");
+            }
             else if (result.Error.Equals(CommandError.ObjectNotFound))
             {
                 await Context.Channel.SendMessageAsync("That user doesn't exist dumbass");
@@ -166,7 +177,7 @@ namespace botTesting
             if (Context.Message == null || Context.Message.Content == "") return;
             if (Context.User.Username.Equals("myBot")) return;
             int ArgPos = 0;
-            if (!(Message.HasStringPrefix("!", ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
+            if (!(Message.HasStringPrefix(prefix, ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
             var Result = await Commands.ExecuteAsync(Context, ArgPos, null);
             if (!Result.IsSuccess)
             {

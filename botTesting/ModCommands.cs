@@ -436,6 +436,24 @@ namespace botTesting
         {
 
         }
-
+        //Prefix default is '!'
+        [Command("setmsgprefix")]
+        public async Task MsgPrefix(string prefix= "")
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (!prefix.Equals(""))
+                {
+                    Program.prefix = prefix;
+                    await Context.Channel.SendMessageAsync("Command prefix set to `" + prefix + "`");
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a valid prefix!");
+                }
+            }
+        }
     }
 }
