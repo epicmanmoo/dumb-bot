@@ -72,18 +72,30 @@ namespace botTesting
             }
         }
 
-     
-        private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext context, IResult result)
+
+        private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext Context, IResult result)
         {
-            //Make better error messages so user knows what he did wrong
+            //Make better error messages so user knows what they did wrong
             if (result.Error.Equals(CommandError.ParseFailed))
             {
-                await context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
+                SocketGuildUser User = Context.User as SocketGuildUser;
+                if (command.Value.Name.Equals("loop"))
+                {
+                    if (User.GuildPermissions.Administrator)
+                    {
+                        await Context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
+                        return;
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Not a mod retard");
+                    }
+                }
             }
 
             else if (result.Error.Equals(CommandError.ObjectNotFound))
             {
-                await context.Channel.SendMessageAsync("That user doesn't exist dumbass");  
+                await Context.Channel.SendMessageAsync("That user doesn't exist dumbass");
             }
             else if (result.Error.Equals(CommandError.BadArgCount))
             {
@@ -106,10 +118,10 @@ namespace botTesting
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
             //567602259102531594
-            var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;           
+            var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
             Random Random = new Random();
             int Rand = Random.Next(JoinMsgList.Count);
-            await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand]); 
+            await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand]);
             using (var DbContext = new SQLiteDBContext())
             {
                 DbContext.Add(new Stone
@@ -118,27 +130,27 @@ namespace botTesting
                     Amount = 0,
                     Warnings = 0,
                     Item1 = 0,
-                    Item2= 0,
-                    Item3= 0,
-                    Item4= 0,
-                    Item5= 0,
-                    Item6= 0,
-                    Item7= 0,
-                    Item8= 0,
-                    Item9= 0,
-                    Item10= 0,
+                    Item2 = 0,
+                    Item3 = 0,
+                    Item4 = 0,
+                    Item5 = 0,
+                    Item6 = 0,
+                    Item7 = 0,
+                    Item8 = 0,
+                    Item9 = 0,
+                    Item10 = 0,
 
                 });
                 await DbContext.SaveChangesAsync();
             }
         }
-        
+
         public async Task AnnounceLeavingUser(SocketGuildUser User)
         {
             //567604758106472448
             var Channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
             Random Rand = new Random();
-            await Channel.SendMessageAsync($"{User} has left. " );
+            await Channel.SendMessageAsync($"{User} has left. ");
             using (var DbContext = new SQLiteDBContext())
             {
                 Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();

@@ -243,7 +243,7 @@ namespace botTesting
             }
         }
         [Command("loop")]
-        public async Task Loop(string Input = "", int Num = 0)
+        public async Task Loop(int Num = 0, [Remainder] string Input= "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
@@ -321,33 +321,50 @@ namespace botTesting
             {
                 if (!msg.Equals(""))
                 {
+                    if (Program.JoinMsgList.Contains(msg))
+                    {
+                        await Context.Channel.SendMessageAsync("The join message list already has this message!");
+                        return;
+                    }
                     Program.JoinMsgList.Add(msg);
-                    await Context.Channel.SendMessageAsync("Message added to list");
+                    await Context.Channel.SendMessageAsync("``" + msg + "``"+ " added to join message list");
                 }
             }
         }
         [Command("clearjoinmsgs")]
         public async Task ClearJoinMsgs(string index = "0")
         {
-            int parsedIndex = Int32.Parse(index);
             SocketGuildUser User = Context.User as SocketGuildUser;
+
             if (User.GuildPermissions.Administrator)
             {
-                if (parsedIndex > 0)
+                if(Program.JoinMsgList.Count == 0)
                 {
-                    Program.JoinMsgList.RemoveAt(parsedIndex - 1);
-                    await Context.Channel.SendMessageAsync("Join message removed");
+                    await Context.Channel.SendMessageAsync("No messages to be removed!");
                     return;
                 }
-                else if (parsedIndex < 0 || parsedIndex == 0)
-                {
-                    await Context.Channel.SendMessageAsync("Enter a valid index");
-                    return;
-                }
-                else if (index.Equals("all"))
+                if (index.Equals("all"))
                 {
                     Program.JoinMsgList.Clear();
                     await Context.Channel.SendMessageAsync("All messages removed!");
+                    return;
+                }
+                int parsedIndex = Int32.Parse(index);
+                if (parsedIndex > Program.JoinMsgList.Count)
+                {
+                    await Context.Channel.SendMessageAsync("That index does not exist!");
+                    return;
+                }
+                else if (parsedIndex > 0)
+                {
+                    await Context.Channel.SendMessageAsync("`" + Program.JoinMsgList[parsedIndex - 1] + "`" + " removed from join message list");
+                    Program.JoinMsgList.RemoveAt(parsedIndex - 1);
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a valid index or type ``all`` to remove all!");
+                    return;
                 }
             }
         }

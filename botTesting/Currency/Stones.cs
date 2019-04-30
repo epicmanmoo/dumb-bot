@@ -47,7 +47,7 @@ namespace botTesting.Currency
                 }
             }
             [Command("give")]
-            public async Task Give(IUser User= null, int Amount= 0)
+            public async Task Give(IUser User = null, int Amount = 0)
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
@@ -94,7 +94,7 @@ namespace botTesting.Currency
                 }
             }
             [Command("take")]
-            public async Task Take(IUser User = null, int Amount= 0)
+            public async Task Take(IUser User = null, int Amount = 0)
             {
                 //method to have a chance of successfully stealing money or not from said user
                 await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
@@ -142,7 +142,7 @@ namespace botTesting.Currency
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Stone Money = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
-                    if(Money.Amount >= 100)
+                    if (Money.Amount >= 100)
                     {
                         Money.Amount -= 100;
                         DbContext.Update(Money);
@@ -184,20 +184,20 @@ namespace botTesting.Currency
                     workTimer.Add(DateTimeOffset.Now);
                     await WorkMethod();
                 }
-                
+
             }
             [Command("inventory")]
             public async Task Inventory()
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
-                    Stone Inv= DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    Stone Inv = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
                     if (Inv.Item1 > 0)
                     {
                         EmbedBuilder Embed = new EmbedBuilder();
                         Embed.WithAuthor("Items");
                         Embed.WithColor(40, 200, 150);
-                        if(Inv.Item1 == 1)
+                        if (Inv.Item1 == 1)
                         {
                             Embed.AddField("Dog:", Inv.Item1);
                             await Context.Channel.SendMessageAsync("", false, Embed.Build());
@@ -208,7 +208,7 @@ namespace botTesting.Currency
                             Embed.AddField("Dogs:", Inv.Item1);
                             await Context.Channel.SendMessageAsync("", false, Embed.Build());
                         }
-                        
+
                     }
                 }
             }
@@ -233,7 +233,7 @@ namespace botTesting.Currency
                 }
             }
             //add more "weird" jobs or ways to earn money
-            
+
         }
 
     }
