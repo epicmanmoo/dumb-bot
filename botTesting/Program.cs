@@ -27,7 +27,8 @@ namespace botTesting
             Client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Debug,
-                MessageCacheSize = 1000
+                MessageCacheSize = 100000000,
+                AlwaysDownloadUsers = true
             });
 
             Commands = new CommandService(new CommandServiceConfig
@@ -123,7 +124,7 @@ namespace botTesting
         private async Task Client_Ready()
         {
             await Client.SetGameAsync("with your feelings");
-
+            
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
@@ -161,7 +162,8 @@ namespace botTesting
             //567604758106472448
             var Channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
             Random Rand = new Random();
-            await Channel.SendMessageAsync($"{User} has left. ");
+            int randIndex = Rand.Next(LeaveMsgList.Count);
+            await Channel.SendMessageAsync($"{User} has left. " + LeaveMsgList[randIndex]);
             using (var DbContext = new SQLiteDBContext())
             {
                 Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();

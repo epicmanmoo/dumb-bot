@@ -13,10 +13,9 @@ namespace botTesting.Currency
     {
         public static List<DateTimeOffset> workTimer = new List<DateTimeOffset>();
         public static List<SocketGuildUser> workTarget = new List<SocketGuildUser>();
-        [Group("money")]
         public class StonesGroup : ModuleBase<SocketCommandContext>
         {
-            [Command("")]
+            [Command("money")]
             public async Task Me(IUser User = null)
             {
                 if (User == null)
@@ -46,6 +45,7 @@ namespace botTesting.Currency
                     await Context.Channel.SendMessageAsync($"{User.Mention} got ${Data.GetStones(User.Id)}");
                 }
             }
+            //FIX THESE BELOW!
             [Command("give")]
             public async Task Give(IUser User = null, int Amount = 0)
             {
@@ -97,9 +97,9 @@ namespace botTesting.Currency
             public async Task Take(IUser User = null, int Amount = 0)
             {
                 //method to have a chance of successfully stealing money or not from said user
-                await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
+                //await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
 
-                await Data.SaveStones(User.Id, Amount);
+                //await Data.SaveStones(User.Id, Amount);
             }
             [Command("reset")]
             public async Task Reset(IUser User = null)
@@ -136,7 +136,7 @@ namespace botTesting.Currency
                 }
                 await Context.Channel.SendMessageAsync("Not a mod retard");
             }
-            [Command("buyDogs")]
+            [Command("buydogs")]
             public async Task BuyDogs()
             {
                 using (var DbContext = new SQLiteDBContext())

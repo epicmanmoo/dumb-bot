@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Discord;
 using Discord.Commands;
 using System.Threading.Tasks;
+using System.Net;
+using Newtonsoft.Json.Linq;
 using System.Linq;
-using Discord.WebSocket;
+using Newtonsoft.Json;
 
 namespace botTesting
 {
@@ -41,7 +41,7 @@ namespace botTesting
             {
                 await Context.Channel.SendMessageAsync(Context.User.Mention + " says fuck you to " + OtherUser.Mention);
             }
-         }
+        }
 
         [Command("embed")]
         public async Task Embed([Remainder] string Input = "")
@@ -100,7 +100,7 @@ namespace botTesting
             Embed.WithColor(255, 0, 238);
             if (User != null)
             {
-                if(User.GetAvatarUrl() == null)
+                if (User.GetAvatarUrl() == null)
                 {
                     await Context.Channel.SendMessageAsync("No PFP for this user");
                     return;
@@ -113,6 +113,60 @@ namespace botTesting
                 Embed.WithImageUrl(Context.User.GetAvatarUrl());
                 await Context.Channel.SendMessageAsync("", false, Embed.Build());
             }
+        }
+        //todo: send top defintion by default (count thumbs up), if user wants rand then allow random
+        //also, maybe split "[" or "("?
+        //make it so empty fields are not shown
+        [Command("define")]
+        public async Task Define([Remainder] string Word = "")
+        {
+            if (!Word.Equals(""))
+            {
+                var encoded = Uri.EscapeUriString(Word);
+                WebClient client = new WebClient();
+                string value = client.DownloadString("http://api.urbandictionary.com/v0/define?term=" + encoded);
+                var result = JsonConvert.DeserializeObject<UrbanDictionary.RootObject>(value);
+                if (result.list.Count > 0)
+                {
+                    Random rand = new Random();
+                    int nextRand = rand.Next(result.list.Count);
+                    String date = result.list.ElementAt(nextRand).written_on.ToString();
+                    DateTime dateValues = (Convert.ToDateTime(date.ToString()));
+                    String day = dateValues.Day.ToString();
+                    String month = dateValues.Month.ToString();
+                    String year = dateValues.Year.ToString();
+                    String fixedDate = month + "/" + day + "/" + year;
+                    EmbedBuilder Embed = new EmbedBuilder();
+                    Uri uri = new Uri("https://www.urbandictionary.com/");
+                    Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
+                    Embed.WithTitle("**Information from **" + uri);
+                    Embed.WithColor(40, 200, 150);
+                    Embed.AddField("Author: ", result.list.ElementAt(nextRand).author);
+                    Embed.AddField("Word: ", result.list.ElementAt(nextRand).word);
+                    Embed.AddField("Example: ", result.list.ElementAt(nextRand).example);
+                    Embed.AddField("Likes: ", result.list.ElementAt(nextRand).thumbs_up);
+                    Embed.AddField("Dislikes: ", result.list.ElementAt(nextRand).thumbs_down);
+                    Embed.AddField("Written on: ", fixedDate);                
+                    await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                    await Context.Channel.SendMessageAsync("**Imprecise translation:** " + result.list.ElementAt(nextRand).definition);
+                    return;
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("That word does not exist!");
+                    return;
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("That word does not exist!");
+                return;
+            }
+        }
+        [Command("translate")]
+        public async Task Translate()
+        {
+            
         }
     }
 }

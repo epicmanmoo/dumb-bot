@@ -433,7 +433,29 @@ namespace botTesting
         [Command("addleavemsg")]
         public async Task AddLeaveMsg([Remainder] string msg = "")
         {
-
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (!msg.Equals(""))
+                {
+                    if (!Program.LeaveMsgList.Contains(msg))
+                    {
+                        Program.LeaveMsgList.Add(msg);
+                        await Context.Channel.SendMessageAsync("`" + msg + "`" + "message added to leave message list");
+                        return;
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Leave message already exists");
+                        return;
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a valid message");
+                    return;
+                }
+            }
         }
         [Command("clearleavemsgs")]
         public async Task ClearLeaveMsgs(int index = 0)
