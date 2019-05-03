@@ -74,7 +74,8 @@ namespace botTesting
             }
         }
 
-
+        //Maybe make it so that if a command is spelled incorrectly but is similar to a command
+        //that exists then tell the user the right way to type the command?
         private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext Context, IResult result)
         {
             //Make better error messages so user knows what they did wrong
@@ -101,8 +102,6 @@ namespace botTesting
             }
             else if (result.Error.Equals(CommandError.UnknownCommand))
             {
-                //Maybe make it so that if a command is spelled incorrectly but is similar to a command
-                //that exists then tell the user the right way to type the command?
                 await Context.Channel.SendMessageAsync("That command does not exist");
             }
             else if (result.Error.Equals(CommandError.ObjectNotFound))

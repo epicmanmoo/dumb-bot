@@ -12,6 +12,103 @@ namespace botTesting
 {
     public class HelloWorld : ModuleBase<SocketCommandContext>
     {
+        private SortedDictionary<string, string> langs = new SortedDictionary<string, string>
+        {
+            ["Azerbaijan"] = "az",
+            ["Malayalam"] = "ml",
+            ["Albanian"] = "sq",
+            ["Maltese"] = "mt",
+            ["Amharic"] = "am",
+            ["Macedonian"] = "mk",
+            ["English"] = "en",
+            ["Maori"] = "mi",
+            ["Arabic"] = "ar",
+            ["Marathi"] = "mr",
+            ["Armenian"] = "hy",
+            ["Mari"] = "mhr",
+            ["Afrikaans"] = "af",
+            ["Mongolian"] = "mn",
+            ["Basque"] = "eu",
+            ["German"] = "de",
+            ["Bashkir"] = "ba",
+            ["Nepali"] = "ne",
+            ["Belarusian"] = "be",
+            ["Norwegian"] = "no",
+            ["Bengali"] = "bn",
+            ["Punjabi"] = "pa",
+            ["Burmese"] = "my",
+            ["Papiamento"] = "pap",
+            ["Bulgarian"] = "bg",
+            ["Persian"] = "fa",
+            ["Bosnian"] = "bs",
+            ["Polish"] = "pl",
+            ["Welsh"] = "cy",
+            ["Portuguese"] = "pt",
+            ["Hungarian"] = "hu",
+            ["Romanian"] = "ro",
+            ["Vietnamese"] = "vi",
+            ["Russian"] = "ru",
+            ["Haitian(Creole)"] = "ht",
+            ["Cebuano"] = "ceb",
+            ["Galician"] = "gl",
+            ["Serbian"] = "sr",
+            ["Dutch"] = "nl",
+            ["Sinhala"] = "si",
+            ["Hill Mari"] = "mrj",
+            ["Slovakian"] = "sk",
+            ["Greek"] = "el",
+            ["Slovenian"] = "sl",
+            ["Georgian"] = "ka",
+            ["Swahili"] = "sw",
+            ["Gujarati"] = "gu",
+            ["Sundanese"] = "su",
+            ["Danish"] = "da",
+            ["Tajik"] = "tg",
+            ["Hebrew"] = "he",
+            ["Thai"] = "th",
+            ["Yiddish"] = "yi",
+            ["Tagalog"] = "tl",
+            ["Indonesian"] = "id",
+            ["Tamil"] = "ta",
+            ["Irish"] = "ga",
+            ["Tatar"] = "tt",
+            ["Italian"] = "it",
+            ["Telugu"] = "te",
+            ["Icelandic"] = "is",
+            ["Turkish"] = "tr",
+            ["Spanish"] = "es",
+            ["Udmurt"] = "udm",
+            ["Kazakh"] = "kk",
+            ["Uzbek"] = "uz",
+            ["Kannada"] = "kn",
+            ["Ukrainian"] = "uk",
+            ["Catalan"] = "ca",
+            ["Urdu"] = "ur",
+            ["Kyrgyz"] = "ky",
+            ["Finnish"] = "fi",
+            ["Chinese"] = "zh",
+            ["French"] = "fr",
+            ["Korean"] = "ko",
+            ["Hindi"] = "hi",
+            ["Xhosa"] = "xh",
+            ["Croatian"] = "hr",
+            ["Khmer"] = "km",
+            ["Czech"] = "cs",
+            ["Laotian"] = "lo",
+            ["Swedish"] = "sv",
+            ["Latin"] = "la",
+            ["Scottish"] = "gd",
+            ["Latvian"] = "lv",
+            ["Estonian"] = "et",
+            ["Lithuanian"] = "lt",
+            ["Esperanto"] = "eo",
+            ["Luxembourgish"] = "lb",
+            ["Javanese"] = "jv",
+            ["Malagasy"] = "mg",
+            ["Japanese"] = "ja",
+            ["Malay"] = "ms"
+        };
+
         [Command("hello")]
         public async Task Hello()
         {
@@ -54,7 +151,6 @@ namespace botTesting
                 Embed.WithColor(40, 200, 150);
                 Embed.WithFooter(Context.User.Username);
                 Embed.WithCurrentTimestamp();
-                //Embed.WithDescription("");
                 Embed.AddField("User input:", Input);
                 await Context.Channel.SendMessageAsync("", false, Embed.Build());
             }
@@ -117,7 +213,8 @@ namespace botTesting
         }
         //todo: send top defintion by default (count thumbs up), if user wants rand then allow random
         //also, maybe split "[" or "("?
-        //make it so empty fields are not shown
+        //make it so empty fields (example, author, def, etc.) are not shown
+        //scrape urban dictionary for word of the day??
         [Command("define")]
         public async Task Define([Remainder] string Word = "")
         {
@@ -138,9 +235,8 @@ namespace botTesting
                     String year = dateValues.Year.ToString();
                     String fixedDate = month + "/" + day + "/" + year;
                     EmbedBuilder Embed = new EmbedBuilder();
-                    Uri uri = new Uri("https://www.urbandictionary.com/");
                     Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
-                    Embed.WithTitle("**Information from **" + uri);
+                    Embed.WithTitle("**Information from**" + result.list.ElementAt(nextRand).permalink);
                     Embed.WithColor(40, 200, 150);
                     Embed.AddField("Author: ", result.list.ElementAt(nextRand).author);
                     Embed.AddField("Word: ", result.list.ElementAt(nextRand).word);
@@ -160,130 +256,193 @@ namespace botTesting
             }
             else
             {
-                await Context.Channel.SendMessageAsync("That word does not exist!");
+                await Context.Channel.SendMessageAsync("Enter a word!");
                 return;
             }
         }
         [Command("translate")]
-        public async Task Translate(string language1, string language2, [Remainder] string msg)
+        public async Task Translate(string language1 = "", string language2 = "", [Remainder] string msg = "")
         {
-            //EMBED FOR THIS!!
-            Dictionary<string, string> langs = new Dictionary<string, string>();
-            langs["Azerbaijan"] = "az";
-            langs["Malayalam"] = "ml";
-            langs["Albanian"] = "sq";
-            langs["Maltese"] = "mt";
-            langs["Amharic"] = "am";
-            langs["Macedonian"] = "mk";
-            langs["English"] = "en";
-            langs["Maori"] = "mi";
-            langs["Arabic"] = "ar";
-            langs["Marathi"] = "mr";
-            langs["Armenian"] = "hy";
-            langs["Mari"] = "mhr";
-            langs["Afrikaans"] = "af";
-            langs["Mongolian"] = "mn";
-            langs["Basque"] = "eu";
-            langs["German"] = "de";
-            langs["Bashkir"] = "ba";
-            langs["Nepali"] = "ne";
-            langs["Belarusian"] = "be";
-            langs["Norwegian"] = "no";
-            langs["Bengali"] = "bn";
-            langs["Punjabi"] = "pa";
-            langs["Burmese"] = "my";
-            langs["Papiamento"] = "pap";
-            langs["Bulgarian"] = "bg";
-            langs["Persian"] = "fa";
-            langs["Bosnian"] = "bs";
-            langs["Polish"] = "pl";
-            langs["Welsh"] = "cy";
-            langs["Portuguese"] = "pt";
-            langs["Hungarian"] = "hu";
-            langs["Romanian"] = "ro";
-            langs["Vietnamese"] = "vi";
-            langs["Russian"] = "ru";
-            langs["Haitian(Creole)"] = "ht";
-            langs["Cebuano"] = "ceb";
-            langs["Galician"] = "gl";
-            langs["Serbian"] = "sr";
-            langs["Dutch"] = "nl";
-            langs["Sinhala"] = "si";
-            langs["Hill Mari"] = "mrj";
-            langs["Slovakian"] = "sk";
-            langs["Greek"] = "el";
-            langs["Slovenian"] = "sl";
-            langs["Georgian"] = "ka";
-            langs["Swahili"] = "sw";
-            langs["Gujarati"] = "gu";
-            langs["Sundanese"] = "su";
-            langs["Danish"] = "da";
-            langs["Tajik"] = "tg";
-            langs["Hebrew"] = "he";
-            langs["Thai"] = "th";
-            langs["Yiddish"] = "yi";
-            langs["Tagalog"] = "tl";
-            langs["Indonesian"] = "id";
-            langs["Tamil"] = "ta";
-            langs["Irish"] = "ga";
-            langs["Tatar"] = "tt";
-            langs["Italian"] = "it";
-            langs["Telugu"] = "te";
-            langs["Icelandic"] = "is";
-            langs["Turkish"] = "tr";
-            langs["Spanish"] = "es";
-            langs["Udmurt"] = "udm";
-            langs["Kazakh"] = "kk";
-            langs["Uzbek"] = "uz";
-            langs["Kannada"] = "kn";
-            langs["Ukrainian"] = "uk";
-            langs["Catalan"] = "ca";
-            langs["Urdu"] = "ur";
-            langs["Kyrgyz"] = "ky";
-            langs["Finnish"] = "fi";
-            langs["Chinese"] = "zh";
-            langs["French"] = "fr";
-            langs["Korean"] = "ko";
-            langs["Hindi"] = "hi";
-            langs["Xhosa"] = "xh";
-            langs["Croatian"] = "hr";
-            langs["Khmer"] = "km";
-            langs["Czech"] = "cs";
-            langs["Laotian"] = "lo";
-            langs["Swedish"] = "sv";
-            langs["Latin"] = "la";
-            langs["Scottish"] = "gd";
-            langs["Latvian"] = "lv";
-            langs["Estonian"] = "et";
-            langs["Lithuanian"] = "lt";
-            langs["Esperanto"] = "eo";
-            langs["Luxembourgish"] = "lb";
-            langs["Javanese"] = "jv";
-            langs["Malagasy"] = "mg";
-            langs["Japanese"] = "ja";
-            langs["Malay"] = "ms";
-            string langFromAndTo = language1 + "-" + language2;
+            if (language1.Equals("") || language2.Equals("") || msg.Equals(""))
+            {
+                await Context.Channel.SendMessageAsync("Provide all parameters!");
+                return;
+            }
+            string valLanguage1 = language1;
+            string valLanguage2 = language2;
+            for (int i = 0; i < langs.Count; i++)
+            {
+                if (language1.Length > 3)
+                {
+                    if (langs.ElementAt(i).Key.Equals(language1))
+                    {
+                        valLanguage1 = langs.ElementAt(i).Value;
+                    }
+                }
+                if (language2.Length > 3)
+                {
+                    if (langs.ElementAt(i).Key.Equals(language2))
+                    {
+                        valLanguage2 = langs.ElementAt(i).Value;
+                    }
+                }
+            }
+            string langFromAndTo = valLanguage1 + "-" + valLanguage2;
             string key = "trnsl.1.1.20190501T085131Z.60ba4708835f8d1f.10422b658ea3bfcf81a3c05d9da973a83920a8ae";
             var encoded = Uri.EscapeUriString(msg);
             WebClient client = new WebClient();
             string value = client.DownloadString("https://translate.yandex.net/api/v1.5/tr.json/translate?lang=" + langFromAndTo + "&key=" + key + "&text=" + encoded);
             var result = JsonConvert.DeserializeObject<YandexTranslate.RootObject>(value);
+            var workedOrNot = result.code;
+            Console.WriteLine(workedOrNot.ToString());
             var translatedText = result.text.ElementAt(0);
-            foreach (KeyValuePair<string, string> item in langs)
+            for (int i = 0; i < langs.Count; i++)
             {
-                EmbedBuilder listOfLanguages = new EmbedBuilder();
-                listOfLanguages.AddField("Key", item.Key);
-                if (item.Value.Contains(language1))
+                if (langs.ElementAt(i).Value.Equals(language1))
                 {
-                    language1 = item.Key;
+                    language1 = langs.ElementAt(i).Key;
                 }
-                if (item.Value.Contains(language2))
+                if (langs.ElementAt(i).Value.Equals(language2))
                 {
-                    language2 = item.Key;
-                    break;
+                    language2 = langs.ElementAt(i).Key;
                 }
+
             }
             await Context.Channel.SendMessageAsync("`" + msg + "`" + " translated from `" + language1 + "` is `" + translatedText + "` in `" + language2 + "`");
+        }
+        [Command("languages")]
+        public async Task Languages(int page)
+        {
+            EmbedBuilder languages = new EmbedBuilder();
+            languages.WithTitle("**Languages**");
+            if (string.IsNullOrEmpty(page.ToString())) { return; }
+            switch (page)
+            {
+                case 1:
+                    for (int i = 0; i < 8; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 1/12");
+                    }
+                    break;
+                case 2:
+                    for (int i = 8; i < 16; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 2/12");
+                    }
+                    break;
+                case 3:
+                    for (int i = 16; i < 24; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 3/12");
+                    }
+                    break;
+                case 4:
+                    for (int i = 24; i < 32; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 4/12");
+                    }
+                    break;
+                case 5:
+                    for (int i = 32; i < 40; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 5/12");
+                    }
+                    break;
+                case 6:
+                    for (int i = 40; i < 48; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 6/12");
+                    }
+                    break;
+                case 7:
+                    for (int i = 48; i < 56; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 7/12");
+                    }
+                    break;
+                case 8:
+                    for (int i = 56; i < 64; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 8/12");
+                    }
+                    break;
+                case 9:
+                    for (int i = 64; i < 72; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 9/12");
+                    }
+                    break;
+                case 10:
+                    for (int i = 72; i < 80; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 10/12");
+                    }
+                    break;
+                case 11:
+                    for (int i = 80; i < 88; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 11/12");
+                    }
+                    break;
+                case 12:
+                    for (int i = 88; i < 93; i++)
+                    {
+                        languages.WithColor(40, 200, 150);
+                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                        languages.AddField("\u200b", "\u200b");
+                        languages.WithFooter("Page 12/12");
+                    }
+                    break;
+                default:
+                    await Context.Channel.SendMessageAsync("Not a valid page!");
+                    return;
+            }
+            await Context.Channel.SendMessageAsync("", false, languages.Build());
         }
     }
 }
