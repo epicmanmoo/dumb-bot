@@ -7,12 +7,13 @@ using Newtonsoft.Json.Linq;
 using System.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
+using HtmlAgilityPack;
 
 namespace botTesting
 {
     public class HelloWorld : ModuleBase<SocketCommandContext>
     {
-        private SortedDictionary<string, string> langs = new SortedDictionary<string, string>
+        readonly SortedDictionary<string, string> langs = new SortedDictionary<string, string>
         {
             ["Azerbaijan"] = "az",
             ["Malayalam"] = "ml",
@@ -443,6 +444,15 @@ namespace botTesting
                     return;
             }
             await Context.Channel.SendMessageAsync("", false, languages.Build());
+        }
+        [Command("wordoftheday")]
+        public async Task WordOfTheDay()
+        {
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument document = web.Load("https://www.urbandictionary.com/");
+            string meaning = document.DocumentNode.SelectSingleNode("//div[@class='meaning']").InnerText;
+            string word = document.DocumentNode.SelectSingleNode("//div[@class='def-header']").SelectSingleNode("//a[@class='word']").InnerText;
+            await Context.Channel.SendMessageAsync(word + ", " + meaning);
         }
     }
 }
