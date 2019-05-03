@@ -446,13 +446,32 @@ namespace botTesting
             await Context.Channel.SendMessageAsync("", false, languages.Build());
         }
         [Command("wordoftheday")]
-        public async Task WordOfTheDay()
+        public async Task WordOfTheDay(int index = 0)
         {
-            HtmlWeb web = new HtmlWeb();
-            HtmlDocument document = web.Load("https://www.urbandictionary.com/");
-            string meaning = document.DocumentNode.SelectSingleNode("//div[@class='meaning']").InnerText;
-            string word = document.DocumentNode.SelectSingleNode("//div[@class='def-header']").SelectSingleNode("//a[@class='word']").InnerText;
-            await Context.Channel.SendMessageAsync(word + ", " + meaning);
+            if (!(index >= 7))
+            {
+                HtmlWeb web = new HtmlWeb();
+                HtmlDocument document = web.Load("https://www.urbandictionary.com/");
+                string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(index).InnerText);
+                string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);
+                string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(index).InnerText.Substring(3));
+                string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(index).InnerText);
+                string dateOfWordOfTheDay = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='ribbon']").ElementAt(index).InnerText);
+                Console.WriteLine(dateOfWordOfTheDay);
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.WithColor(40, 200, 150);
+                embed.WithTitle("**Urban Dictionary's Word Of The Day!**");
+                embed.AddField("Word:", word);
+                embed.AddField("Example:", example);
+                embed.AddField("Author and Date Written:", date);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
+                await Context.Channel.SendMessageAsync("Imprecise definition: " + meaning);
+                return;
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Send a valid index!");
+            }
         }
     }
 }
