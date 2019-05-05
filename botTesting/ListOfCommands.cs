@@ -448,24 +448,45 @@ namespace botTesting
         [Command("wordoftheday")]
         public async Task WordOfTheDay(int index = 0)
         {
+            HtmlWeb web = new HtmlWeb
+            {
+                UsingCache = false
+            };
+            HtmlDocument document = web.Load("https://www.urbandictionary.com");
+            string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(index).InnerText);
+            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);
+            string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(index).InnerText.Substring(3));
+            string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(index).InnerText);
+            string dateOfWordOfTheDay = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='ribbon']").ElementAt(index).InnerText);
+            string[] splitDateOfWordOfTheDay = dateOfWordOfTheDay.Split(" ");
+            string monthOfWOD = splitDateOfWordOfTheDay[0];
+            int dayOfWOD = Int32.Parse(splitDateOfWordOfTheDay[1]);
+            DateTime dateNow = DateTime.Now;
+            string monthNow = dateNow.ToString("MMMM");
+            int dayNow = dateNow.Day;
             if (!(index >= 7))
             {
-                HtmlWeb web = new HtmlWeb();
-                HtmlDocument document = web.Load("https://www.urbandictionary.com/");
-                string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(index).InnerText);
-                string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);
-                string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(index).InnerText.Substring(3));
-                string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(index).InnerText);
-                string dateOfWordOfTheDay = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='ribbon']").ElementAt(index).InnerText);
-                Console.WriteLine(dateOfWordOfTheDay);
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithColor(40, 200, 150);
-                embed.WithTitle("**Urban Dictionary's Word Of The Day!**");
+                if ((monthOfWOD.Trim().Equals(monthNow.Trim())) && (dayOfWOD == dayNow))
+                {
+                    embed.WithTitle("**Urban Dictionary's Word Of The Day!**");
+                    
+                }
+                else
+                {
+                    //if (!(monthOfWOD.Trim().Equals(monthNow.Trim())) && (dayOfWOD == dayNow - 1))
+                    //{
+                    //    embed.WithTitle("**No new word today (so far), here is the last word of the day posted! On " + monthOfWOD + " " + dayOfWOD + "!**");
+                    //}
+
+                    embed.WithTitle("**Urban Dictionary's Word Of The Day On " + monthOfWOD + " " + dayOfWOD + "!**");
+                }
                 embed.AddField("Word:", word);
                 embed.AddField("Example:", example);
                 embed.AddField("Author and Date Written:", date);
                 await Context.Channel.SendMessageAsync("", false, embed.Build());
-                await Context.Channel.SendMessageAsync("Imprecise definition: " + meaning);
+                await Context.Channel.SendMessageAsync("**Imprecise definition:** " + meaning);
                 return;
             }
             else
@@ -473,5 +494,11 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("Send a valid index!");
             }
         }
+        [Command("randomword")]
+        public async Task RandomWord()
+        {
+            //Get a random word from UD, similar output like above
+        }
+
     }
 }
