@@ -489,7 +489,18 @@ namespace botTesting
         [Command("randomword")]
         public async Task RandomWord()
         {
-            //Get a random word from UD, similar output like above
+            Random Rand = new Random();
+            int randPage = Rand.Next(1000) + 1;
+            HtmlWeb web = new HtmlWeb();
+            if(randPage == 0)
+            {
+                web.Load("https://www.urbandictionary.com/random.php");
+            }
+            else
+            {
+                web.Load("https://www.urbandictionary.com/random.php?page=" + randPage);
+            }
+            //get a random word from each random page
         }
         //Make this so it returns a specific breed as well!
         [Command("dogimage")]
