@@ -78,6 +78,15 @@
           "lib/netstandard2.0/Discord.Net.WebSocket.dll": {}
         }
       },
+      "FluentScheduler/5.3.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.4/FluentScheduler.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.4/FluentScheduler.dll": {}
+        }
+      },
       "HtmlAgilityPack/1.11.4": {
         "type": "package",
         "dependencies": {
@@ -1958,6 +1967,23 @@
         "lib/netstandard1.3/Discord.Net.WebSocket.xml",
         "lib/netstandard2.0/Discord.Net.WebSocket.dll",
         "lib/netstandard2.0/Discord.Net.WebSocket.xml"
+      ]
+    },
+    "FluentScheduler/5.3.0": {
+      "sha512": "XBLwqw3FFdkG6qIrxg7M9mIsigZje+qKTinWZWfyr47IN6O/0z6fFUoQCVEBvY0lk1puf4hU0VnVhN/kPNZL+A==",
+      "type": "package",
+      "path": "fluentscheduler/5.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "fluentscheduler.5.3.0.nupkg.sha512",
+        "fluentscheduler.nuspec",
+        "lib/net40/FluentScheduler.dll",
+        "lib/net40/FluentScheduler.pdb",
+        "lib/net40/FluentScheduler.xml",
+        "lib/netstandard1.4/FluentScheduler.dll",
+        "lib/netstandard1.4/FluentScheduler.pdb",
+        "lib/netstandard1.4/FluentScheduler.xml"
       ]
     },
     "HtmlAgilityPack/1.11.4": {
@@ -6179,6 +6205,7 @@
     ".NETCoreApp,Version=v2.1": [
       "Discord.Net >= 2.0.1",
       "Discord.Net.Commands >= 2.0.1",
+      "FluentScheduler >= 5.3.0",
       "HtmlAgilityPack >= 1.11.4",
       "Microsoft.EntityFrameworkCore.Design >= 2.2.4",
       "Microsoft.EntityFrameworkCore.Sqlite >= 2.2.4",
@@ -6236,6 +6263,10 @@
           "Discord.Net.Commands": {
             "target": "Package",
             "version": "[2.0.1, )"
+          },
+          "FluentScheduler": {
+            "target": "Package",
+            "version": "[5.3.0, )"
           },
           "HtmlAgilityPack": {
             "target": "Package",

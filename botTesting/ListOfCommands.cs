@@ -11,12 +11,12 @@ using HtmlAgilityPack;
 
 namespace botTesting
 {
-    public class HelloWorld : ModuleBase<SocketCommandContext>
+    public class ListOfCommands : ModuleBase<SocketCommandContext>
     {
         readonly SortedDictionary<string, string> langs = new SortedDictionary<string, string>
         {
             ["Azerbaijan"] = "az",
-            ["Malayalam"] = "ml",
+            ["Malayalam"] = "ml",   
             ["Albanian"] = "sq",
             ["Maltese"] = "mt",
             ["Amharic"] = "am",
@@ -194,6 +194,7 @@ namespace botTesting
         [Command("avatar")]
         public async Task Avatar(IUser User = null)
         {
+            Console.WriteLine(Context.User.GetAvatarUrl());
             EmbedBuilder Embed = new EmbedBuilder();
             Embed.WithColor(255, 0, 238);
             if (User != null)
@@ -316,13 +317,16 @@ namespace botTesting
         {
             EmbedBuilder languages = new EmbedBuilder();
             languages.WithTitle("**Languages**");
-            if (string.IsNullOrEmpty(page.ToString())) { return; }
+            languages.WithColor(40, 200, 150);
+            if (page > 12 || page < 0)
+            {
+                await Context.Channel.SendMessageAsync("Not a valid index!");
+            }
             switch (page)
             {
                 case 1:
                     for (int i = 0; i < 8; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -332,7 +336,6 @@ namespace botTesting
                 case 2:
                     for (int i = 8; i < 16; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -342,7 +345,6 @@ namespace botTesting
                 case 3:
                     for (int i = 16; i < 24; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -352,7 +354,6 @@ namespace botTesting
                 case 4:
                     for (int i = 24; i < 32; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -362,7 +363,6 @@ namespace botTesting
                 case 5:
                     for (int i = 32; i < 40; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -372,7 +372,6 @@ namespace botTesting
                 case 6:
                     for (int i = 40; i < 48; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -382,7 +381,6 @@ namespace botTesting
                 case 7:
                     for (int i = 48; i < 56; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -392,7 +390,6 @@ namespace botTesting
                 case 8:
                     for (int i = 56; i < 64; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -402,7 +399,6 @@ namespace botTesting
                 case 9:
                     for (int i = 64; i < 72; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -412,7 +408,6 @@ namespace botTesting
                 case 10:
                     for (int i = 72; i < 80; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -422,7 +417,6 @@ namespace botTesting
                 case 11:
                     for (int i = 80; i < 88; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -432,7 +426,6 @@ namespace botTesting
                 case 12:
                     for (int i = 88; i < 93; i++)
                     {
-                        languages.WithColor(40, 200, 150);
                         languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
                         languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                         languages.AddField("\u200b", "\u200b");
@@ -448,13 +441,12 @@ namespace botTesting
         [Command("wordoftheday")]
         public async Task WordOfTheDay(int index = 0)
         {
-            HtmlWeb web = new HtmlWeb
-            {
-                UsingCache = false
-            };
-            HtmlDocument document = web.Load("https://www.urbandictionary.com");
+            Random Rand = new Random();
+            int Value = Rand.Next(int.MaxValue);
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument document = web.Load("https://www.urbandictionary.com/?random=" + Value);
             string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(index).InnerText);
-            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);
+            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);          
             string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(index).InnerText.Substring(3));
             string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(index).InnerText);
             string dateOfWordOfTheDay = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='ribbon']").ElementAt(index).InnerText);
@@ -499,6 +491,18 @@ namespace botTesting
         {
             //Get a random word from UD, similar output like above
         }
-
+        //Make this so it returns a specific breed as well!
+        [Command("dogimage")]
+        public async Task DogImage()
+        {
+            WebClient client = new WebClient();
+            string value = client.DownloadString("https://dog.ceo/api/breeds/image/random");
+            var result = JsonConvert.DeserializeObject<RandomDogPics.RootObject>(value);
+            EmbedBuilder Embed = new EmbedBuilder();
+            Embed.WithColor(255, 0, 238);
+            Embed.WithImageUrl(result.message);
+            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+        }
+        //https://www.metaweather.com/api/#location use this website for weather!
     }
 }

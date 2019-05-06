@@ -6,6 +6,7 @@ using Discord.WebSocket;
 using Discord.Commands;
 using System.Linq;
 using System.Collections.Generic;
+using FluentScheduler;
 
 namespace botTesting
 {
@@ -49,29 +50,6 @@ namespace botTesting
             await Client.LoginAsync(TokenType.Bot, Token);
             await Client.StartAsync();
             await Task.Delay(-1);
-            using (var DbContext = new SQLiteDBContext())
-            {
-                if (DbContext.Stones.Where(x => x.UserId == 519689963562991651).Count() < 1)
-                {
-                    DbContext.Add(new Stone
-                    {
-                        UserId = 519689963562991651,
-                        Amount = 0,
-                        Warnings = 0,
-                        Item1 = 0,
-                        Item2 = 0,
-                        Item3 = 0,
-                        Item4 = 0,
-                        Item5 = 0,
-                        Item6 = 0,
-                        Item7 = 0,
-                        Item8 = 0,
-                        Item9 = 0,
-                        Item10 = 0
-                    });
-                    await DbContext.SaveChangesAsync();
-                }
-            }
         }
 
         //Maybe make it so that if a command is spelled incorrectly but is similar to a command
@@ -123,7 +101,6 @@ namespace botTesting
         private async Task Client_Ready()
         {
             await Client.SetGameAsync("with your feelings");
-            
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
