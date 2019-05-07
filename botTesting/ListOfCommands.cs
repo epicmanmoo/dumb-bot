@@ -16,7 +16,7 @@ namespace botTesting
         readonly SortedDictionary<string, string> langs = new SortedDictionary<string, string>
         {
             ["Azerbaijan"] = "az",
-            ["Malayalam"] = "ml",   
+            ["Malayalam"] = "ml",
             ["Albanian"] = "sq",
             ["Maltese"] = "mt",
             ["Amharic"] = "am",
@@ -446,7 +446,7 @@ namespace botTesting
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load("https://www.urbandictionary.com/?random=" + Value);
             string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(index).InnerText);
-            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);          
+            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(index).SelectNodes("//a[@class='word']").ElementAt(index).InnerText);
             string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(index).InnerText.Substring(3));
             string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(index).InnerText);
             string dateOfWordOfTheDay = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='ribbon']").ElementAt(index).InnerText);
@@ -460,10 +460,11 @@ namespace botTesting
             {
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithColor(40, 200, 150);
+                embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
                 if ((monthOfWOD.Trim().Equals(monthNow.Trim())) && (dayOfWOD == dayNow))
                 {
                     embed.WithTitle("**Urban Dictionary's Word Of The Day!**");
-                    
+
                 }
                 else
                 {
@@ -490,17 +491,30 @@ namespace botTesting
         public async Task RandomWord()
         {
             Random Rand = new Random();
-            int randPage = Rand.Next(1000) + 1;
+            int randPage = Rand.Next(999) + 1;
             HtmlWeb web = new HtmlWeb();
-            if(randPage == 0)
+            HtmlDocument document;
+            if (randPage == 1)
             {
-                web.Load("https://www.urbandictionary.com/random.php");
+                document = web.Load("https://www.urbandictionary.com/random.php");
             }
             else
             {
-                web.Load("https://www.urbandictionary.com/random.php?page=" + randPage);
+                document = web.Load("https://www.urbandictionary.com/random.php?page=" + randPage);
             }
-            //get a random word from each random page
+            int randWord = Rand.Next(1, 7);
+            string meaning = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='meaning']").ElementAt(randWord).InnerText);
+            string word = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='def-header']").ElementAt(randWord).SelectNodes("//a[@class='word']").ElementAt(randWord).InnerText);
+            string date = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class='contributor']").ElementAt(randWord).InnerText.Substring(3));
+            string example = WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//div[@class= 'example']").ElementAt(randWord).InnerText);
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
+            embed.WithColor(40, 200, 150);
+            embed.AddField("Word:", word);
+            embed.AddField("Example:", example);
+            embed.AddField("Author and Date Written:", date);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+            await Context.Channel.SendMessageAsync("**Imprecise definition:** " + meaning);
         }
         //Make this so it returns a specific breed as well!
         [Command("dogimage")]
@@ -514,6 +528,16 @@ namespace botTesting
             Embed.WithImageUrl(result.message);
             await Context.Channel.SendMessageAsync("", false, Embed.Build());
         }
-        //https://www.metaweather.com/api/#location use this website for weather!
+        [Command("weather")]
+        public async Task Weather([Remainder] string city = "")
+        {
+            //https://www.metaweather.com/api/#location use this website for weather!
+        }
+        [Command("javadef")]
+        public async Task JavaDef()
+        {
+         
+        }
+        //More APIs/Scraping? 
     }
 }
