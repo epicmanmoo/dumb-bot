@@ -534,9 +534,40 @@ namespace botTesting
             //https://www.metaweather.com/api/#location use this website for weather!
         }
         [Command("javadef")]
-        public async Task JavaDef()
+        public async Task JavaDef([Remainder] string Word = "")
         {
-         
+            string term1;
+            string term2;
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument document;
+            if (Word.Contains(" "))
+            {
+                string[] splitWord = Word.Split(" ");
+                if(splitWord.Length != 2)
+                {
+                    await Context.Channel.SendMessageAsync("Term does not exist");
+                    return;
+                }
+                term1 = splitWord[0];
+                term2 = splitWord[1];
+                document = web.Load("https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm");
+            }
+            else
+            {
+                document = web.Load("https://www.tutorialspoint.com/java/java_" + Word + ".htm");
+            }
+            if (document.DocumentNode.SelectSingleNode("//p").InnerText.Contains("not found")){
+                await Context.Channel.SendMessageAsync("Term does not exist");
+                return;
+            }
+            string meaning = "";
+            for(int i = 0; i < 2; i++)
+            {
+                meaning += " " + WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//p").ElementAt(i).InnerText);
+            }
+            EmbedBuilder Embed = new EmbedBuilder();
+            Embed.WithDescription(meaning);
+            await Context.Channel.SendMessageAsync("", false, Embed.Build());
         }
         //More APIs/Scraping? 
     }
