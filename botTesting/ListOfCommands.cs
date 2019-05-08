@@ -536,38 +536,55 @@ namespace botTesting
         [Command("javadef")]
         public async Task JavaDef([Remainder] string Word = "")
         {
-            string term1;
-            string term2;
-            HtmlWeb web = new HtmlWeb();
-            HtmlDocument document;
-            if (Word.Contains(" "))
+            if (!Word.Equals(""))
             {
-                string[] splitWord = Word.Split(" ");
-                if(splitWord.Length != 2)
+                string term1;
+                string term2;
+                EmbedBuilder Embed = new EmbedBuilder();
+                Embed.WithAuthor(Context.User.GetAvatarUrl());
+                Embed.WithFooter(Context.User.Username);
+                Embed.WithCurrentTimestamp();
+                Embed.WithColor(Color.DarkBlue);
+                HtmlWeb web = new HtmlWeb();
+                HtmlDocument document;
+                if (Word.Contains(" "))
+                {
+                    string[] splitWord = Word.Split(" ");
+                    if (splitWord.Length != 2)
+                    {
+                        await Context.Channel.SendMessageAsync("Term does not exist");
+                        return;
+                    }
+                    term1 = splitWord[0];
+                    term2 = splitWord[1];
+                    document = web.Load("https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm");
+                    string websiteToDisplayName = "https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm";
+                    Embed.WithTitle("More info on ``" + term1 + term2 + "`` here");
+                    Embed.WithUrl(websiteToDisplayName);
+                }
+                else
+                {
+                    document = web.Load("https://www.tutorialspoint.com/java/java_" + Word + ".htm");
+                    string websiteToDisplayName = "https://www.tutorialspoint.com/java/java_" + Word + ".htm";
+                    Embed.WithTitle("More info on ``" + Word + "`` here");
+                    Embed.WithUrl(websiteToDisplayName);
+                }
+                if (document.DocumentNode.SelectSingleNode("//p").InnerText.Contains("not found"))
                 {
                     await Context.Channel.SendMessageAsync("Term does not exist");
                     return;
                 }
-                term1 = splitWord[0];
-                term2 = splitWord[1];
-                document = web.Load("https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm");
-            }
-            else
-            {
-                document = web.Load("https://www.tutorialspoint.com/java/java_" + Word + ".htm");
-            }
-            if (document.DocumentNode.SelectSingleNode("//p").InnerText.Contains("not found")){
-                await Context.Channel.SendMessageAsync("Term does not exist");
+                string meaning = "";
+                for (int i = 0; i < 2; i++)
+                {
+                    meaning += " " + WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//p").ElementAt(i).InnerText);
+                }
+                Embed.WithDescription(meaning);
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
                 return;
             }
-            string meaning = "";
-            for(int i = 0; i < 2; i++)
-            {
-                meaning += " " + WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//p").ElementAt(i).InnerText);
-            }
-            EmbedBuilder Embed = new EmbedBuilder();
-            Embed.WithDescription(meaning);
-            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            await Context.Channel.SendMessageAsync("Enter a phrase to search (use !javadefs to list all phrases");
+
         }
         //More APIs/Scraping? 
     }
