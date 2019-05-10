@@ -109,6 +109,10 @@ namespace botTesting
             ["Japanese"] = "ja",
             ["Malay"] = "ms"
         };
+        readonly List<String> dogBreeds = new List<String>();
+        //add dog breeds
+        readonly List<String> dogSubBreeds = new List<String>();
+        //add dog sub breeds
 
         [Command("hello")]
         public async Task Hello()
@@ -516,17 +520,61 @@ namespace botTesting
             await Context.Channel.SendMessageAsync("", false, embed.Build());
             await Context.Channel.SendMessageAsync("**Imprecise definition:** " + meaning);
         }
-        //Make this so it returns a specific breed as well!
         [Command("dogimage")]
-        public async Task DogImage()
+        public async Task DogImage([Remainder] string typeOfDog= "")
         {
             WebClient client = new WebClient();
-            string value = client.DownloadString("https://dog.ceo/api/breeds/image/random");
-            var result = JsonConvert.DeserializeObject<RandomDogPics.RootObject>(value);
             EmbedBuilder Embed = new EmbedBuilder();
-            Embed.WithColor(255, 0, 238);
-            Embed.WithImageUrl(result.message);
-            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            Embed.WithColor(0, 255, 0);
+            if (!typeOfDog.Equals(""))
+            {
+                if (typeOfDog.Contains(" "))
+                {
+                    string[] splitTypeOfDog = typeOfDog.Split(" ");
+                    if (splitTypeOfDog.Length != 2)
+                    {
+                        await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist");
+                        return;
+                    }           
+                    string breed = splitTypeOfDog[0];
+                    string subBreed = splitTypeOfDog[1];
+                    string messageWithBreedAndSubBreed = client.DownloadString("https://dog.ceo/api/breed/" + subBreed + "/" + breed + "/images");
+                    var resultWithBreedAndSubBreed = JsonConvert.DeserializeObject<SpecificDogPics.RootObject>(messageWithBreedAndSubBreed);
+                    Random picture = new Random();
+                    int indexOfPicture = picture.Next(0, resultWithBreedAndSubBreed.message.Count);
+                    Embed.WithImageUrl(resultWithBreedAndSubBreed.message.ElementAt(indexOfPicture));
+                    await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                    return;
+                }
+                else
+                {
+                    string messageWithBreed = client.DownloadString("https://dog.ceo/api/breed/" + typeOfDog + "/images");
+                    var resultWithBreed = JsonConvert.DeserializeObject<SpecificDogPics.RootObject>(messageWithBreed);
+                    Random picture = new Random();
+                    int indexOfPicture = picture.Next(0, resultWithBreed.message.Count);
+                    Embed.WithImageUrl(resultWithBreed.message.ElementAt(indexOfPicture));
+                    await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                    return;
+                }
+            }
+            else
+            {
+                string randomMessage = client.DownloadString("https://dog.ceo/api/breeds/image/random");
+                var resultRandom = JsonConvert.DeserializeObject<RandomDogPics.RootObject>(randomMessage);
+                Embed.WithImageUrl(resultRandom.message.ToString());
+                Console.WriteLine(resultRandom.message);
+                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+            }
+        }
+        [Command("breeds")]
+        public async Task Breeds()
+        {
+            //show list of breeds
+        }
+        [Command("subBreeds")]
+        public async Task SubBreeds([Remainder] string breed)
+        {
+            //show list of sub breeds
         }
         [Command("weather")]
         public async Task Weather([Remainder] string city = "")
@@ -541,7 +589,7 @@ namespace botTesting
                 string term1;
                 string term2;
                 EmbedBuilder Embed = new EmbedBuilder();
-                Embed.WithAuthor(Context.User.GetAvatarUrl());
+                Embed.WithAuthor("Definition", Context.User.GetAvatarUrl());
                 Embed.WithFooter(Context.User.Username);
                 Embed.WithCurrentTimestamp();
                 Embed.WithColor(Color.DarkBlue);
@@ -559,7 +607,7 @@ namespace botTesting
                     term2 = splitWord[1];
                     document = web.Load("https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm");
                     string websiteToDisplayName = "https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm";
-                    Embed.WithTitle("More info on ``" + term1 + term2 + "`` here");
+                    Embed.WithTitle("More info on ``" + term1 + " " + term2 + "`` here");
                     Embed.WithUrl(websiteToDisplayName);
                 }
                 else
@@ -583,8 +631,12 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("", false, Embed.Build());
                 return;
             }
-            await Context.Channel.SendMessageAsync("Enter a phrase to search (use !javadefs to list all phrases");
-
+            await Context.Channel.SendMessageAsync("Enter a phrase to search (use !javadefs to list all phrases)");
+        }
+        [Command("javadefs")]
+        public async Task JavaDefs()
+        {
+            //Lists all defs on the site
         }
         //More APIs/Scraping? 
     }
