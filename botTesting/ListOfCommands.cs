@@ -109,10 +109,6 @@ namespace botTesting
             ["Japanese"] = "ja",
             ["Malay"] = "ms"
         };
-        readonly List<String> dogBreeds = new List<String>();
-        //add dog breeds
-        readonly List<String> dogSubBreeds = new List<String>();
-        //add dog sub breeds
 
         [Command("hello")]
         public async Task Hello()
@@ -525,7 +521,7 @@ namespace botTesting
         {
             WebClient client = new WebClient();
             EmbedBuilder Embed = new EmbedBuilder();
-            Embed.WithColor(0, 255, 0);
+            Embed.WithColor(Color.Green);
             if (!typeOfDog.Equals(""))
             {
                 if (typeOfDog.Contains(" "))
@@ -569,17 +565,12 @@ namespace botTesting
         [Command("breeds")]
         public async Task Breeds()
         {
-            //show list of breeds
-        }
-        [Command("subBreeds")]
-        public async Task SubBreeds([Remainder] string breed)
-        {
-            //show list of sub breeds
+            await Context.Channel.SendMessageAsync("https://dog.ceo/dog-api/breeds-list to view a list of breeds and subreeds");
         }
         [Command("weather")]
         public async Task Weather([Remainder] string city = "")
         {
-            //https://www.metaweather.com/api/#location use this website for weather!
+            //https://www.metaweather.com/api/#location use this website for weather?
         }
         [Command("javadef")]
         public async Task JavaDef([Remainder] string Word = "")
@@ -638,6 +629,20 @@ namespace botTesting
         {
             //Lists all defs on the site
         }
-        //More APIs/Scraping? 
+        [Command("lyrics")]
+        public async Task Lyrics(string author, [Remainder] string song)
+        {
+            var fAuthor = Uri.EscapeUriString(author);
+            var fSong = Uri.EscapeUriString(song);
+            WebClient client = new WebClient();
+            string value = client.DownloadString("https://api.lyrics.ovh/v1/" + fAuthor + "/" + fSong);
+            var result = JsonConvert.DeserializeObject<Lyrics.RootObject>(value);
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
+            embed.WithTitle("Lyrics for: " + song + " - " + author);
+            embed.WithColor(Color.Gold);
+            embed.WithDescription(result.lyrics);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
     }
 }
