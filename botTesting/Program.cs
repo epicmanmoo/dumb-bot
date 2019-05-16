@@ -84,7 +84,7 @@ namespace botTesting
             }
             else if (result.Error.Equals(CommandError.ObjectNotFound))
             {
-                await Context.Channel.SendMessageAsync("That user doesn't exist dumbass");
+                await Context.Channel.SendMessageAsync("That user does not exist");
             }
             else if (result.Error.Equals(CommandError.BadArgCount))
             {

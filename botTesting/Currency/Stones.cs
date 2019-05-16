@@ -52,12 +52,13 @@ namespace botTesting.Currency
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Stone sMoney = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    Stone tMoney = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
                     int Money = sMoney.Amount;
                     if (!(Money < Amount))
                     {
                         if (Amount < 0)
                         {
-                            await Context.Channel.SendMessageAsync("Can't give negative money :rage: Use ``!money take ...`` if you want to take");
+                            await Context.Channel.SendMessageAsync("Can't give negative money :rage:");
                             return;
                         }
                         if (User == null)
@@ -65,12 +66,7 @@ namespace botTesting.Currency
                             await Context.Channel.SendMessageAsync("Who tf should I give money to?");
                             return;
                         }
-                        if (User.Username.Equals("myBot"))
-                        {
-                            await Context.Channel.SendMessageAsync("Tf? What do you want me to do with money?");
-                            return;
-                        }
-                        if (User.IsBot && !User.Username.Equals("myBot"))
+                        if (User.IsBot)
                         {
                             await Context.Channel.SendMessageAsync("Stop trying to give money to robots :rage:");
                             return;
@@ -85,9 +81,11 @@ namespace botTesting.Currency
                             await Context.Channel.SendMessageAsync("How much should I give bruh?");
                             return;
                         }
-
                         await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
+                        sMoney.Amount -= Amount;
+                        tMoney.Amount += Amount;
                         await Data.SaveStones(User.Id, Amount);
+                        await DbContext.SaveChangesAsync();
                         return;
                     }
                     await Context.Channel.SendMessageAsync("You do not enough money to send");
@@ -137,8 +135,9 @@ namespace botTesting.Currency
                 await Context.Channel.SendMessageAsync("Not a mod retard");
             }
             [Command("buydogs")]
-            public async Task BuyDogs()
+            public async Task BuyDogs(string sAmount = "")
             {
+                int amount = int.Parse(sAmount);
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Stone Money = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
@@ -147,7 +146,7 @@ namespace botTesting.Currency
                         Money.Amount -= 100;
                         DbContext.Update(Money);
                         await DbContext.SaveChangesAsync();
-                        await Context.Channel.SendMessageAsync("Bought a dog");
+                        await Context.Channel.SendMessageAsync("You bought a dog!");
                         await Data.BuyDogs(Context.User.Id);
                     }
                     else
