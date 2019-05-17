@@ -123,7 +123,7 @@ namespace botTesting
         [Command("help")]
         public async Task Help()
         {
-            await Context.Channel.SendMessageAsync("```Here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!loop <phrase> <numoftimes> (surround phrases longer than one word in quotes)\n!money\n!money <user>\n!money give <user> <amount>\n!money take <user> <amount>\n!store\n!money work\n!money reset <user>\n!money inventory\n!avatar\n!avatar <user>```");
+            await Context.Channel.SendMessageAsync("```Java\nHere are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!avatar (Optional)<user>\n!money (Optional)<user>\n!give <user> <amount>\n!take <user> <amount>\n!store\n!work\n!reset <user>\n!inventory\n!avatar\n!avatar <user>\n!define <term>\n!wordoftheday\n!javadef <term(s)>\n!translate <lang from> <lang to> text\n!languages <page #>\n!randomword\n!dogimage (Optional)<breed>(Optional)<subbreed>\n!breeds\n!lyrics <author> (surround in quotes if longer than one word) <song>```");
         }
         [Command("fuck")]
         public async Task Fuck([Remainder] IGuildUser OtherUser)
@@ -132,7 +132,7 @@ namespace botTesting
             {
                 await Context.Channel.SendMessageAsync(Context.User.Mention + " has fucked themselves");
             }
-            else if (OtherUser.Username.Equals("myBot"))
+            else if (OtherUser.IsBot)
             {
                 await Context.Channel.SendMessageAsync("No, fuck **_you_**");
             }
@@ -632,8 +632,8 @@ namespace botTesting
         [Command("lyrics")]
         public async Task Lyrics(string author, [Remainder] string song)
         {
-            var fAuthor = Uri.EscapeUriString(author);
-            var fSong = Uri.EscapeUriString(song);
+            var fAuthor = Uri.EscapeDataString(author);
+            var fSong = Uri.EscapeDataString(song);
             WebClient client = new WebClient();
             string value = client.DownloadString("https://api.lyrics.ovh/v1/" + fAuthor + "/" + fSong);
             var result = JsonConvert.DeserializeObject<Lyrics.RootObject>(value);
@@ -641,7 +641,14 @@ namespace botTesting
             embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
             embed.WithTitle("Lyrics for: " + song + " - " + author);
             embed.WithColor(Color.Gold);
-            embed.WithDescription(result.lyrics);
+            if (result.lyrics.Length > 2048)
+            {
+                embed.WithDescription(result.lyrics.Substring(0, 2045) + "...");
+            }
+            else
+            {
+                embed.WithDescription(result.lyrics);
+            }
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
     }

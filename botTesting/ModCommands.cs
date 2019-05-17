@@ -24,6 +24,7 @@ namespace botTesting
             if (Context.Client.Guilds.Where(x => x.Id == GuildId).Count() < 1)
             {
                 await Context.Channel.SendMessageAsync("Can't send an invite to a server I'm not in :rage:");
+                return;
             }
 
             if (!(Context.Guild.Id == GuildId))
@@ -58,7 +59,7 @@ namespace botTesting
             }
             else
             {
-                await Context.Channel.SendMessageAsync("Why **_THE FUCK_** would you create an invite for your server while on your **OWN** server");
+                await Context.Channel.SendMessageAsync("Why would you create an invite for your server while on your own server");
             }
         }
         [Command("kick")]

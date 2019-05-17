@@ -92,12 +92,30 @@ namespace botTesting.Currency
                 }
             }
             [Command("take")]
-            public async Task Take(IUser User = null, int Amount = 0)
+            public async Task Take(IUser User = null)
             {
-                //method to have a chance of successfully stealing money or not from said user
-                //await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
-
-                //await Data.SaveStones(User.Id, Amount);
+               using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone UserMoneyS = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                    Stone UserMoneyM = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    int UserMoney = UserMoneyS.Amount;
+                    Random RandStealSuccess = new Random();
+                    Random RandStealMoney = new Random();
+                    int rsm = RandStealMoney.Next(UserMoney);
+                    int rss = RandStealSuccess.Next(1);
+                    if(rss == 0)
+                    {
+                        UserMoneyS.Amount += rsm;
+                        UserMoneyM.Amount -= rsm;
+                        await Context.Channel.SendMessageAsync($"{Context.User.Mention} stole ${rsm} from ${User.Mention}!");
+                        await DbContext.SaveChangesAsync();
+                        return;
+                    }
+                    else
+                    {
+                        //failed
+                    }
+                }
             }
             [Command("reset")]
             public async Task Reset(IUser User = null)
