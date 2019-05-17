@@ -643,7 +643,16 @@ namespace botTesting
             embed.WithColor(Color.Gold);
             if (result.lyrics.Length > 2048)
             {
-                embed.WithDescription(result.lyrics.Substring(0, 2045) + "...");
+                int tem = 0;
+                for (int i = 2045; i >= 0; i--)
+                {
+                  if (result.lyrics[i] == ' ')
+                  {
+                    tem = i;
+                    break;
+                  }
+                }
+                embed.WithDescription(result.lyrics.Substring(0, tem) + "...");
             }
             else
             {

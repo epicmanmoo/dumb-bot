@@ -245,7 +245,7 @@ namespace botTesting
             }
         }
         [Command("loop")]
-        public async Task Loop(int Num = 0, [Remainder] string Input= "")
+        public async Task Loop(int Num = 0, [Remainder] string Input = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
@@ -343,7 +343,7 @@ namespace botTesting
 
             if (User.GuildPermissions.Administrator)
             {
-                if(Program.JoinMsgList.Count == 0)
+                if (Program.JoinMsgList.Count == 0)
                 {
                     await Context.Channel.SendMessageAsync("No messages to be removed!");
                     return;
@@ -465,7 +465,7 @@ namespace botTesting
         }
         //Prefix default is '!'
         [Command("setmsgprefix")]
-        public async Task MsgPrefix(string prefix= "")
+        public async Task MsgPrefix(string prefix = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
@@ -478,7 +478,32 @@ namespace botTesting
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync("Enter a valid prefix!");
+                    await Context.Channel.SendMessageAsync("Enter a prefix!");
+                }
+            }
+        }
+        [Command("changebotname")]
+        public async Task ChangeBotName([Remainder] String name = "")
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            if (User.GuildPermissions.Administrator)
+            {
+                if (!name.Equals(""))
+                {
+                    var guild = User.Guild;
+                    var user = guild.GetUser(565048969206693888);
+                    string nickname = user.Nickname;
+                    if (name.Equals(nickname))
+                    {
+                        await Context.Channel.SendMessageAsync("That is my current name!");
+                        return;
+                    }
+                    await user.ModifyAsync(x => x.Nickname = name);
+                    await Context.Channel.SendMessageAsync($"My name has been changed to `{name}`!");
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a name!");
                 }
             }
         }

@@ -13,6 +13,9 @@ namespace botTesting.Currency
     {
         public static List<DateTimeOffset> workTimer = new List<DateTimeOffset>();
         public static List<SocketGuildUser> workTarget = new List<SocketGuildUser>();
+
+        public static List<DateTimeOffset> robTimer = new List<DateTimeOffset>();
+        public static List<SocketGuildUser> robTarget = new List<SocketGuildUser>();
         public class StonesGroup : ModuleBase<SocketCommandContext>
         {
             [Command("money")]
@@ -91,29 +94,89 @@ namespace botTesting.Currency
                     await Context.Channel.SendMessageAsync("You do not enough money to send");
                 }
             }
-            [Command("take")]
+            [Command("rob")]
             public async Task Take(IUser User = null)
             {
-               using (var DbContext = new SQLiteDBContext())
+                if (User != null)
                 {
-                    Stone UserMoneyS = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
-                    Stone UserMoneyM = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
-                    int UserMoney = UserMoneyS.Amount;
-                    Random RandStealSuccess = new Random();
-                    Random RandStealMoney = new Random();
-                    int rsm = RandStealMoney.Next(UserMoney);
-                    int rss = RandStealSuccess.Next(1);
-                    if(rss == 0)
+                    if(User.Id == Context.User.Id)
                     {
-                        UserMoneyS.Amount += rsm;
-                        UserMoneyM.Amount -= rsm;
-                        await Context.Channel.SendMessageAsync($"{Context.User.Mention} stole ${rsm} from ${User.Mention}!");
-                        await DbContext.SaveChangesAsync();
+                        await Context.Channel.SendMessageAsync("You can't rob from yourself, that'd be a loophole ;)");
                         return;
+                    }
+                    if (User.IsBot)
+                    {
+                        await Context.Channel.SendMessageAsync("Bots don't have money");
+                        return;
+                    }  
+                    if (robTarget.Contains(Context.User as SocketGuildUser))
+                    {
+                        if (robTimer[robTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) >= DateTimeOffset.Now)
+                        {
+                            int secondsLeft = (int)(robTimer[robTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) - DateTimeOffset.Now).TotalSeconds;
+                            EmbedBuilder Embed = new EmbedBuilder();
+                            Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
+                            Embed.WithColor(40, 200, 150);
+                            Embed.WithDescription($":x: Wait {secondsLeft} more seconds before robbing");
+                            await Context.Channel.SendMessageAsync("", false, Embed.Build());
+                            return;
+                        }
+                        else
+                        {
+                            robTimer[robTarget.IndexOf(Context.Message.Author as SocketGuildUser)] = DateTimeOffset.Now;
+                            await RobMethod(User);
+                        }
                     }
                     else
                     {
-                        //failed
+                        robTarget.Add(Context.User as SocketGuildUser);
+                        robTimer.Add(DateTimeOffset.Now);
+                        await RobMethod(User);
+                    }
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Specify a user to rob from!");
+                }
+            }
+            public async Task RobMethod(IUser User)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    Stone UserMoneyS = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                    if (UserMoneyS.Amount < 1)
+                    {
+                        await Context.Channel.SendMessageAsync("You can't make them go broke, let them live :/");
+                        return;
+                    }
+                    Stone UserMoneyM = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    Random RandStealSuccess = new Random();
+                    Random RandStealMoney = new Random();
+                    Random RandFailedMoney = new Random();
+                    int rss = RandStealSuccess.Next(0, 100);
+                    int rsm = RandStealMoney.Next(2, UserMoneyS.Amount);
+
+                    int rfm = RandFailedMoney.Next(2, UserMoneyM.Amount);
+                    if (rss % 2 == 0)
+                    {
+                        if (rsm != 0)
+                        {
+                            UserMoneyS.Amount -= rsm;
+                            UserMoneyM.Amount += rsm;
+                            await Context.Channel.SendMessageAsync($"{Context.User.Mention} stole ${rsm} from {User.Mention}!");
+                            await DbContext.SaveChangesAsync();
+                            return;
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync($"{Context.User.Mention} failed to steal any money!");
+                        }
+                    }
+                    else if (rss % 2 == 1)
+                    {
+                        UserMoneyM.Amount -= rsm;
+                        await Context.Channel.SendMessageAsync($"{Context.User.Mention} was caught trying to steal money! You lost ${rsm}");
+                        await DbContext.SaveChangesAsync();
                     }
                 }
             }
@@ -185,7 +248,7 @@ namespace botTesting.Currency
                         EmbedBuilder Embed = new EmbedBuilder();
                         Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
                         Embed.WithColor(40, 200, 150);
-                        Embed.WithDescription($":x: Wait {secondsLeft} more seconds before working dumbass");
+                        Embed.WithDescription($":x: Wait {secondsLeft} more seconds before working");
                         await Context.Channel.SendMessageAsync("", false, Embed.Build());
                         return;
                     }
@@ -202,6 +265,26 @@ namespace botTesting.Currency
                     await WorkMethod();
                 }
 
+            }
+            public async Task WorkMethod()
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+
+                    Random Rand = new Random();
+                    string[] Jobs = {"You worked at a factory", "You worked at a hotel",
+                                "You worked as a chef", "You worked at a graveyard",
+                                "You did chores because no women were there to help", "You got away **just** in time from a bank robbery",
+                                "Before the owners could find out, you robbed their mansion", "You became a sex slave for a day, pleasing several people",
+                                "You were on your way to work but got hit by a car but get compensated", "You get hired to murder"}; //add more jobs
+                    int Job = Rand.Next(Jobs.Length);
+                    int Cash = Rand.Next(401) + 100;
+                    Stone GiveCash = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    GiveCash.Amount += Cash;
+                    await Context.Channel.SendMessageAsync(Jobs[Job] + ", earning $" + Cash);
+                    DbContext.Update(GiveCash);
+                    await DbContext.SaveChangesAsync();
+                }
             }
             [Command("inventory")]
             public async Task Inventory()
@@ -229,27 +312,6 @@ namespace botTesting.Currency
                     }
                 }
             }
-            public async Task WorkMethod()
-            {
-                using (var DbContext = new SQLiteDBContext())
-                {
-
-                    Random Rand = new Random();
-                    string[] Jobs = {"You worked at a factory", "You worked at a hotel",
-                                "You worked as a chef", "You worked at a graveyard",
-                                "You did chores because no women were there to help", "You got away **just** in time from a bank robbery",
-                                "Before the owners could find out, you robbed their mansion", "You became a sex slave for a day, pleasing several people",
-                                "You were on your way to work but got hit by a car but get compensated", "You get hired to murder"}; //add more jobs
-                    int Job = Rand.Next(Jobs.Length);
-                    int Cash = Rand.Next(401) + 100;
-                    Stone GiveCash = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
-                    GiveCash.Amount += Cash;
-                    await Context.Channel.SendMessageAsync(Jobs[Job] + ", earning $" + Cash);
-                    DbContext.Update(GiveCash);
-                    await DbContext.SaveChangesAsync();
-                }
-            }
-            //add more "weird" jobs or ways to earn money
 
         }
 

@@ -102,6 +102,11 @@ namespace botTesting
         {
             await Client.SetGameAsync("with your feelings");
         }
+        
+        private async Task Disconnected()
+        {
+
+        }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
