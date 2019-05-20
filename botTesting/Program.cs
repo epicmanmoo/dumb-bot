@@ -64,12 +64,7 @@ namespace botTesting
                 {
                     if (command.Value.Name.Equals("loop"))
                     {
-                        await Context.Channel.SendMessageAsync("Go back and reread how to loop dumbass");
-                        return;
-                    }
-                    if (command.Value.Name.Equals("setmsgprefix"))
-                    {
-                        await Context.Channel.SendMessageAsync("Enter a valid prefix!");
+                        await Context.Channel.SendMessageAsync("Go back and reread how to loop");
                         return;
                     }
                 }
@@ -84,11 +79,18 @@ namespace botTesting
             }
             else if (result.Error.Equals(CommandError.ObjectNotFound))
             {
-                await Context.Channel.SendMessageAsync("That user does not exist");
+                if (command.Value.Name.Equals("give"))
+                {
+                    await Context.Channel.SendMessageAsync("Either the user does not exist or the usage of the command was incorrect");
+                }
             }
             else if (result.Error.Equals(CommandError.BadArgCount))
             {
-                //error for this type
+                if (command.Value.Name.Equals("buydogs"))
+                {
+                    await Context.Channel.SendMessageAsync("Please provide the number of dogs you want to buy");
+                    return;
+                }
             }
             //etc errors...
         }
@@ -103,38 +105,42 @@ namespace botTesting
             await Client.SetGameAsync("with your feelings");
         }
         
-        private async Task Disconnected()
-        {
-
-        }
-
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
-            //567602259102531594
-            var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
-            Random Random = new Random();
-            int Rand = Random.Next(JoinMsgList.Count);
-            await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand]);
             using (var DbContext = new SQLiteDBContext())
             {
-                DbContext.Add(new Stone
+                SocketGuild guild = Context.Guild as SocketGuild;
+                int members = guild.MemberCount;
+                string sMembers = members.ToString();
+                //567602259102531594
+                var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
+                Random Random = new Random();
+                int Rand = Random.Next(JoinMsgList.Count);
+                if (sMembers.Equals("1"))
                 {
-                    UserId = User.Id,
-                    Amount = 0,
-                    Warnings = 0,
-                    Item1 = 0,
-                    Item2 = 0,
-                    Item3 = 0,
-                    Item4 = 0,
-                    Item5 = 0,
-                    Item6 = 0,
-                    Item7 = 0,
-                    Item8 = 0,
-                    Item9 = 0,
-                    Item10 = 0,
-
-                });
-                await DbContext.SaveChangesAsync();
+                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}st");
+                    return;
+                }   
+                else if (sMembers.Equals("2") || sMembers.EndsWith("2"))
+                {
+                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}nd");
+                    return;
+                }
+                else if (sMembers.Equals("3") || sMembers.EndsWith("3"))
+                {
+                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}rd");
+                    return;
+                }
+                else if (sMembers.Equals("11"))
+                {
+                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}st");
+                    return;
+                }
+                else
+                {
+                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}th");
+                    return;
+                }
             }
         }
 
@@ -147,9 +153,12 @@ namespace botTesting
             await Channel.SendMessageAsync($"{User} has left. " + LeaveMsgList[randIndex]);
             using (var DbContext = new SQLiteDBContext())
             {
-                Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
-                DbContext.Remove(Stone);
-                await DbContext.SaveChangesAsync();
+                if (DbContext.Stones.Where(x => x.UserId == User.Id).Count() == 1)
+                {
+                    Stone Stone = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                    DbContext.Remove(Stone);
+                    await DbContext.SaveChangesAsync();
+                }
             }
         }
 
@@ -158,7 +167,7 @@ namespace botTesting
             var Message = MessageParam as SocketUserMessage;
             var Context = new SocketCommandContext(Client, Message);
             if (Context.Message == null || Context.Message.Content == "") return;
-            if (Context.User.Username.Equals("myBot")) return;
+            if (Context.User.Username.Equals("Retard Bot")) return;
             int ArgPos = 0;
             if (!(Message.HasStringPrefix(prefix, ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
             var Result = await Commands.ExecuteAsync(Context, ArgPos, null);

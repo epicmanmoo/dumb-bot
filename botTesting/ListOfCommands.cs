@@ -321,121 +321,15 @@ namespace botTesting
             if (page > 12 || page < 0)
             {
                 await Context.Channel.SendMessageAsync("Not a valid index!");
+                return;
             }
-            switch (page)
+            for (int i = (page - 1) * 8; i < page * 8; i++)
             {
-                case 1:
-                    for (int i = 0; i < 8; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 1/12");
-                    }
-                    break;
-                case 2:
-                    for (int i = 8; i < 16; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 2/12");
-                    }
-                    break;
-                case 3:
-                    for (int i = 16; i < 24; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 3/12");
-                    }
-                    break;
-                case 4:
-                    for (int i = 24; i < 32; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 4/12");
-                    }
-                    break;
-                case 5:
-                    for (int i = 32; i < 40; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 5/12");
-                    }
-                    break;
-                case 6:
-                    for (int i = 40; i < 48; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 6/12");
-                    }
-                    break;
-                case 7:
-                    for (int i = 48; i < 56; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 7/12");
-                    }
-                    break;
-                case 8:
-                    for (int i = 56; i < 64; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 8/12");
-                    }
-                    break;
-                case 9:
-                    for (int i = 64; i < 72; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 9/12");
-                    }
-                    break;
-                case 10:
-                    for (int i = 72; i < 80; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 10/12");
-                    }
-                    break;
-                case 11:
-                    for (int i = 80; i < 88; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 11/12");
-                    }
-                    break;
-                case 12:
-                    for (int i = 88; i < 93; i++)
-                    {
-                        languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
-                        languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
-                        languages.AddField("\u200b", "\u200b");
-                        languages.WithFooter("Page 12/12");
-                    }
-                    break;
-                default:
-                    await Context.Channel.SendMessageAsync("Not a valid page!");
-                    return;
-            }
+                languages.AddField("Full Form: ", langs.ElementAt(i).Key, true);
+                languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
+                languages.AddField("\u200b", "\u200b");
+                languages.WithFooter(page + "/12");
+            }    
             await Context.Channel.SendMessageAsync("", false, languages.Build());
         }
         [Command("wordoftheday")]

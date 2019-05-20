@@ -18,44 +18,81 @@ namespace botTesting.Currency
         public static List<SocketGuildUser> robTarget = new List<SocketGuildUser>();
         public class StonesGroup : ModuleBase<SocketCommandContext>
         {
-            [Command("money")]
-            public async Task Me(IUser User = null)
-            {
-                if (User == null)
-                {
-                    if (Data.GetStones(Context.User.Id) == 0)
-                    {
-                        await Context.Channel.SendMessageAsync("Lmao, you got nothing. Broke af :joy:");
-                    }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync($"You have ${Data.GetStones(Context.User.Id)}");
-                        return;
-                    }
-                }
-                else if (User.IsBot)
-                {
-                    await Context.Channel.SendMessageAsync("Bots don't have money retard");
-                    return;
-                }
-                else if (User.Equals(Context.User))
-                {
-                    await Context.Channel.SendMessageAsync("Why not just use the ``!money`` command dumbass");
-                    return;
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync($"{User.Mention} got ${Data.GetStones(User.Id)}");
-                }
-            }
-            //FIX THESE BELOW!
-            [Command("give")]
-            public async Task Give(IUser User = null, int Amount = 0)
+            public async Task CreateUserInTable(IUser User = null)
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    if (User != null)
+                    {
+                        if (DbContext.Stones.Where(x => x.UserId == User.Id).Count() < 1)
+                        {
+                            DbContext.Add(new Stone
+                            {
+                                UserId = User.Id,
+                                Amount = 0,
+                                Warnings = 0,
+                                Item1 = 0,
+                                Item2 = 0,
+                                Item3 = 0,
+                                Item4 = 0,
+                                Item5 = 0,
+                                Item6 = 0,
+                                Item7 = 0,
+                                Item8 = 0,
+                                Item9 = 0,
+                                Item10 = 0,
+
+                            });
+                            await DbContext.SaveChangesAsync();
+                        }
+                        return;
+                    }
+                    return;
+                }
+            }
+            [Command("money")]
+            public async Task Money(SocketGuildUser User = null)
+            {
+                SocketGuildUser Yourself = Context.User as SocketGuildUser;
+                await CreateUserInTable(User);
+                await CreateUserInTable(Yourself);
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    if (User == null)
+                    {
+                        Stone You = DbContext.Stones.Where(x => x.UserId == Yourself.Id).FirstOrDefault();
+                        if (You.Amount == 0)
+                        {
+                            await Context.Channel.SendMessageAsync("You are broke, literally.");
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync($"You have ${You.Amount}");
+                            return;
+                        }
+                    }
+                    else if (User.IsBot)
+                    {
+                        await Context.Channel.SendMessageAsync("Bots don't have money");
+                        return;
+                    }
+                    else
+                    {
+                        Stone Other = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                        await Context.Channel.SendMessageAsync($"{User.Nickname ?? User.Username} has ${Other.Amount}");
+                    }
+                }
+            }
+            [Command("give")]
+            public async Task Give(SocketGuildUser User = null, int Amount = 0)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuildUser You = Context.User as SocketGuildUser;
                     Stone sMoney = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
                     Stone tMoney = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
+                    await CreateUserInTable(User);
+                    await CreateUserInTable(You);
                     int Money = sMoney.Amount;
                     if (!(Money < Amount))
                     {
@@ -84,10 +121,9 @@ namespace botTesting.Currency
                             await Context.Channel.SendMessageAsync("How much should I give bruh?");
                             return;
                         }
-                        await Context.Channel.SendMessageAsync($"{User.Mention} got ${Amount} from {Context.User.Mention}");
+                        await Context.Channel.SendMessageAsync($"You gave ${Amount} to {User.Username ?? User.Nickname}");
                         sMoney.Amount -= Amount;
                         tMoney.Amount += Amount;
-                        await Data.SaveStones(User.Id, Amount);
                         await DbContext.SaveChangesAsync();
                         return;
                     }
@@ -95,20 +131,20 @@ namespace botTesting.Currency
                 }
             }
             [Command("rob")]
-            public async Task Take(IUser User = null)
+            public async Task Take(SocketGuildUser User = null)
             {
                 if (User != null)
                 {
-                    if(User.Id == Context.User.Id)
+                    if (User.Id == Context.User.Id)
                     {
-                        await Context.Channel.SendMessageAsync("You can't rob from yourself, that'd be a loophole ;)");
+                        await Context.Channel.SendMessageAsync("You can't rob from yourself, that'd be a loophole :wink:");
                         return;
                     }
                     if (User.IsBot)
                     {
                         await Context.Channel.SendMessageAsync("Bots don't have money");
                         return;
-                    }  
+                    }
                     if (robTarget.Contains(Context.User as SocketGuildUser))
                     {
                         if (robTimer[robTarget.IndexOf(Context.Message.Author as SocketGuildUser)].AddSeconds(30) >= DateTimeOffset.Now)
@@ -139,104 +175,116 @@ namespace botTesting.Currency
                     await Context.Channel.SendMessageAsync("Specify a user to rob from!");
                 }
             }
-            public async Task RobMethod(IUser User)
+            public async Task RobMethod(SocketGuildUser User)
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    SocketGuildUser You = Context.User as SocketGuildUser;
+                    await CreateUserInTable(User);
+                    await CreateUserInTable(You);
                     Stone UserMoneyS = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
-                    if (UserMoneyS.Amount < 1)
+                    Stone UserMoneyM = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    if (UserMoneyS.Amount < 300)
                     {
                         await Context.Channel.SendMessageAsync("You can't make them go broke, let them live :/");
                         return;
                     }
-                    Stone UserMoneyM = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    if (UserMoneyM.Amount < 300)
+                    {
+                        await Context.Channel.SendMessageAsync("You don't have enough money to rob yet");
+                        return;
+                    }
                     Random RandStealSuccess = new Random();
                     Random RandStealMoney = new Random();
                     Random RandFailedMoney = new Random();
                     int rss = RandStealSuccess.Next(0, 100);
-                    int rsm = RandStealMoney.Next(2, UserMoneyS.Amount);
-
-                    int rfm = RandFailedMoney.Next(2, UserMoneyM.Amount);
+                    int rsm = RandStealMoney.Next(100, UserMoneyS.Amount - 100);
+                    int rfm = RandFailedMoney.Next(100, UserMoneyM.Amount - 100);
                     if (rss % 2 == 0)
                     {
                         if (rsm != 0)
                         {
                             UserMoneyS.Amount -= rsm;
                             UserMoneyM.Amount += rsm;
-                            await Context.Channel.SendMessageAsync($"{Context.User.Mention} stole ${rsm} from {User.Mention}!");
+                            await Context.Channel.SendMessageAsync($"You stole ${rsm} from {User.Username ?? User.Nickname}!");
                             await DbContext.SaveChangesAsync();
                             return;
-                        }
-                        else
-                        {
-                            await Context.Channel.SendMessageAsync($"{Context.User.Mention} failed to steal any money!");
                         }
                     }
                     else if (rss % 2 == 1)
                     {
                         UserMoneyM.Amount -= rsm;
-                        await Context.Channel.SendMessageAsync($"{Context.User.Mention} was caught trying to steal money! You lost ${rsm}");
+                        await Context.Channel.SendMessageAsync($"You were caught trying to steal money! You lost ${rfm}");
                         await DbContext.SaveChangesAsync();
+                        return;
                     }
                 }
             }
-            [Command("reset")]
-            public async Task Reset(IUser User = null)
-            {
-                SocketGuildUser ChkUser = Context.User as SocketGuildUser;
-                if (ChkUser.GuildPermissions.Administrator)
-                {
-                    if (User == null)
-                    {
-                        await Context.Channel.SendMessageAsync("Specify a user to reset bruh");
-                        return;
-                    }
-                    if (User.IsBot)
-                    {
-                        await Context.Channel.SendMessageAsync("Stop including bots :neutral_face:");
-                        return;
-                    }
+            //[Command("reset")]
+            //public async Task Reset(IUser User = null)
+            //{
+            //    SocketGuildUser ChkUser = Context.User as SocketGuildUser;
+            //    if (ChkUser.GuildPermissions.Administrator)
+            //    {
+            //        if (User == null)
+            //        {
+            //            await Context.Channel.SendMessageAsync("Specify a user to reset bruh");
+            //            return;
+            //        }
+            //        if (User.IsBot)
+            //        {
+            //            await Context.Channel.SendMessageAsync("Stop including bots :neutral_face:");
+            //            return;
+            //        }
 
-                    using (var DbContext = new SQLiteDBContext())
+            //        using (var DbContext = new SQLiteDBContext())
+            //        {
+            //            int Num = DbContext.Stones.Where(x => x.UserId == User.Id).Count();
+            //            if (Num == 0)
+            //            {
+            //                await Context.Channel.SendMessageAsync($"{User.Mention} was already deleted");
+            //                return;
+            //            }
+            //            else
+            //            {
+            //                await Context.Channel.SendMessageAsync("You got reset, so you lost all your money :cry:");
+            //                DbContext.Stones.RemoveRange(DbContext.Stones.Where(x => x.UserId == User.Id));
+            //                await DbContext.SaveChangesAsync();
+            //            }
+            //        }
+            //    }
+            //    await Context.Channel.SendMessageAsync("Not a mod retard");
+            //}
+            [Command("buydogs")]
+            public async Task BuyDogs(int amount)
+            {
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuildUser You = Context.User as SocketGuildUser;
+                    await CreateUserInTable(You);
+                    Stone Money = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
+                    if (Money.Amount >= 100 * amount)
                     {
-                        int Num = DbContext.Stones.Where(x => x.UserId == User.Id).Count();
-                        if (Num == 0)
+                        Money.Amount -= 100 * amount;
+                        Money.Item1 += amount;
+                        await DbContext.SaveChangesAsync();
+                        if (amount == 1)
                         {
-                            await Context.Channel.SendMessageAsync($"{User.Mention} was already deleted");
+                            await Context.Channel.SendMessageAsync($"You bought a dog!");
                             return;
                         }
                         else
                         {
-                            await Context.Channel.SendMessageAsync("You got reset, so you lost all your money :cry:");
-                            DbContext.Stones.RemoveRange(DbContext.Stones.Where(x => x.UserId == User.Id));
-                            await DbContext.SaveChangesAsync();
+                            await Context.Channel.SendMessageAsync($"You bought {amount} dogs!");
                         }
-                    }
-                }
-                await Context.Channel.SendMessageAsync("Not a mod retard");
-            }
-            [Command("buydogs")]
-            public async Task BuyDogs(string sAmount = "")
-            {
-                int amount = int.Parse(sAmount);
-                using (var DbContext = new SQLiteDBContext())
-                {
-                    Stone Money = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
-                    if (Money.Amount >= 100)
-                    {
-                        Money.Amount -= 100;
-                        DbContext.Update(Money);
-                        await DbContext.SaveChangesAsync();
-                        await Context.Channel.SendMessageAsync("You bought a dog!");
-                        await Data.BuyDogs(Context.User.Id);
                     }
                     else
                     {
-                        await Context.Channel.SendMessageAsync("You don't have enough money peasant");
+                        await Context.Channel.SendMessageAsync("You don't have enough money to buy dogs :cry:");
                     }
                 }
             }
-            //9 more methods for store!!
+            //9 more methods for store!! ^
             [Command("work")]
             public async Task Work()
             {
@@ -270,13 +318,14 @@ namespace botTesting.Currency
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
-
+                    SocketGuildUser You = Context.User as SocketGuildUser;
+                    await CreateUserInTable(You);
                     Random Rand = new Random();
                     string[] Jobs = {"You worked at a factory", "You worked at a hotel",
                                 "You worked as a chef", "You worked at a graveyard",
                                 "You did chores because no women were there to help", "You got away **just** in time from a bank robbery",
                                 "Before the owners could find out, you robbed their mansion", "You became a sex slave for a day, pleasing several people",
-                                "You were on your way to work but got hit by a car but get compensated", "You get hired to murder"}; //add more jobs
+                                "You were on your way to work but got hit by a car and get compensated", "You get hired to murder"}; //add more jobs
                     int Job = Rand.Next(Jobs.Length);
                     int Cash = Rand.Next(401) + 100;
                     Stone GiveCash = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
@@ -287,10 +336,12 @@ namespace botTesting.Currency
                 }
             }
             [Command("inventory")]
-            public async Task Inventory()
+            public async Task Inventory(SocketGuildUser User = null)
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    SocketGuildUser You = Context.User as SocketGuildUser;
+                    await CreateUserInTable(You);
                     Stone Inv = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
                     if (Inv.Item1 > 0)
                     {
@@ -308,7 +359,6 @@ namespace botTesting.Currency
                             Embed.AddField("Dogs:", Inv.Item1);
                             await Context.Channel.SendMessageAsync("", false, Embed.Build());
                         }
-
                     }
                 }
             }

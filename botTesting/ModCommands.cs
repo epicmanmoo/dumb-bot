@@ -11,6 +11,7 @@ namespace botTesting
 {
     public class ModCommands : ModuleBase<SocketCommandContext>
     {
+        public static string nickNameOfBot = "Retard Bot"; //should be in database
         [Command("serverinvite")]
         public async Task ServerInvite(ulong GuildId)
         {
@@ -313,8 +314,8 @@ namespace botTesting
             }
             await Role.ModifyAsync(x => x.Position = Temp.Position);
         }
-        //If you only want one join message then only add one.
-        //Adding multiple will result in a random selection from the amount of messages in the list.
+        //These commands below should be in a databse
+        //------------------------------------------------
         [Command("addjoinmsg")]
         public async Task SetJoinMsg([Remainder] string msg = "")
         {
@@ -329,9 +330,6 @@ namespace botTesting
                         return;
                     }
                     Program.JoinMsgList.Add(msg);
-                    //RestUserMessage Message = await Context.Channel.SendMessageAsync("``" + msg + "``" + " added to join message list");
-                    //Emoji d = new Emoji("\U0001f602");
-                    //await Message.AddReactionAsync(d);
                     await Context.Channel.SendMessageAsync("``" + msg + "``" + " added to join message list");
                 }
             }
@@ -468,11 +466,17 @@ namespace botTesting
         public async Task MsgPrefix(string prefix = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
+            SocketSelfUser Bot = Context.Client.CurrentUser as SocketSelfUser;
             if (User.GuildPermissions.Administrator)
             {
                 if (!prefix.Equals(""))
                 {
+                    var guild = User.Guild;
+                    var user = guild.GetUser(565048969206693888);
+                    string nickname = user.Nickname;                
                     Program.prefix = prefix;
+                    await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + nickNameOfBot);
+                    //await Bot.ModifyAsync(x => x.Username = "[" + Program.prefix + "] " + nameOfBot);
                     await Context.Channel.SendMessageAsync("Command prefix set to `" + prefix + "`");
                     return;
                 }
@@ -482,8 +486,8 @@ namespace botTesting
                 }
             }
         }
-        [Command("changebotname")]
-        public async Task ChangeBotName([Remainder] String name = "")
+        [Command("changebotnickname")]
+        public async Task ChangeBotNickName([Remainder] String name = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
@@ -495,17 +499,19 @@ namespace botTesting
                     string nickname = user.Nickname;
                     if (name.Equals(nickname))
                     {
-                        await Context.Channel.SendMessageAsync("That is my current name!");
+                        await Context.Channel.SendMessageAsync("That is my current nickname!");
                         return;
                     }
-                    await user.ModifyAsync(x => x.Nickname = name);
-                    await Context.Channel.SendMessageAsync($"My name has been changed to `{name}`!");
+                    nickNameOfBot = name;
+                    await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + name);
+                    await Context.Channel.SendMessageAsync($"My nickname has been changed to `{name}`!");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync("Enter a name!");
+                    await Context.Channel.SendMessageAsync("Enter a nickname!");
                 }
             }
         }
+        //------------------------------------------------
     }
 }
