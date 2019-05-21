@@ -11,7 +11,42 @@ namespace botTesting
 {
     public class ModCommands : ModuleBase<SocketCommandContext>
     {
-        public static string nickNameOfBot = "Retard Bot"; //should be in database
+        public async Task CreateUserInTable(SocketGuildUser OtherUser = null)
+        {
+            using (var DbContext = new SQLiteDBContext())
+            {
+                if (OtherUser != null)
+                {
+                    if (DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
+                    {
+                        DbContext.Add(new Stone
+                        {
+                            UserId = OtherUser.Id,
+                            Amount = 0,
+                            Warnings = 0,
+                            Item1 = 0,
+                            Item2 = 0,
+                            Item3 = 0,
+                            Item4 = 0,
+                            Item5 = 0,
+                            Item6 = 0,
+                            Item7 = 0,
+                            Item8 = 0,
+                            Item9 = 0,
+                            Item10 = 0,
+
+                        });
+                        await DbContext.SaveChangesAsync();
+                    }
+                    return;
+                }
+                return;
+            }
+        }
+        public async Task CreateGuildInTable(SocketGuild GuildId)
+        {
+            //adds guild and other info preliminarily (is that a word?)
+        }
         [Command("serverinvite")]
         public async Task ServerInvite(ulong GuildId)
         {
@@ -98,30 +133,9 @@ namespace botTesting
             SocketGuildUser User = Context.User as SocketGuildUser;
             if (User.GuildPermissions.Administrator)
             {
-
                 using (var DbContext = new SQLiteDBContext())
                 {
-                    if (DbContext.Stones.Where(x => x.UserId == OtherUser.Id).Count() < 1)
-                    {
-                        DbContext.Add(new Stone
-                        {
-                            UserId = OtherUser.Id,
-                            Amount = 0,
-                            Warnings = 0,
-                            Item1 = 0,
-                            Item2 = 0,
-                            Item3 = 0,
-                            Item4 = 0,
-                            Item5 = 0,
-                            Item6 = 0,
-                            Item7 = 0,
-                            Item8 = 0,
-                            Item9 = 0,
-                            Item10 = 0,
-
-                        });
-                        await DbContext.SaveChangesAsync();
-                    }
+                    await CreateUserInTable(User);                  
                     if (!reason.Equals(""))
                     {
                         Stone WarningUpdate = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
@@ -166,6 +180,7 @@ namespace botTesting
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    await CreateUserInTable(User);
                     Stone Warnings = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
                     Warnings.Warnings = 0;
                     DbContext.Update(Warnings);
@@ -182,6 +197,7 @@ namespace botTesting
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    await CreateUserInTable(User);
                     Stone Warnings = DbContext.Stones.Where(x => x.UserId == OtherUser.Id).FirstOrDefault();
                     if (Warnings.Warnings == 1)
                     {
@@ -229,7 +245,7 @@ namespace botTesting
             {
                 await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
                 await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
-                await Context.Channel.SendMessageAsync(":x: Repeat command");
+                await Context.Channel.SendMessageAsync(":x: Repeat command (one time thing)");
                 await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
                 return;
             }
@@ -311,19 +327,9 @@ namespace botTesting
         [Command("addjoinmsg")]
         public async Task SetJoinMsg([Remainder] string msg = "")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            using (var DbContext = new SQLiteDBContext())
             {
-                if (!msg.Equals(""))
-                {
-                    if (Program.JoinMsgList.Contains(msg))
-                    {
-                        await Context.Channel.SendMessageAsync("The join message list already has this message!");
-                        return;
-                    }
-                    Program.JoinMsgList.Add(msg);
-                    await Context.Channel.SendMessageAsync("``" + msg + "``" + " added to join message list");
-                }
+                
             }
         }
         [Command("clearjoinmsgs")]
@@ -463,7 +469,6 @@ namespace botTesting
         public async Task MsgPrefix(string prefix = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
-            SocketSelfUser Bot = Context.Client.CurrentUser as SocketSelfUser;
             if (User.GuildPermissions.Administrator)
             {
                 if (!prefix.Equals(""))
@@ -473,7 +478,6 @@ namespace botTesting
                     string nickname = user.Nickname;
                     Program.prefix = prefix;
                     await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + nickNameOfBot);
-                    //await Bot.ModifyAsync(x => x.Username = "[" + Program.prefix + "] " + nameOfBot);
                     await Context.Channel.SendMessageAsync("Command prefix set to `" + prefix + "`");
                     return;
                 }

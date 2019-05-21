@@ -427,12 +427,21 @@ namespace botTesting
                     string[] splitTypeOfDog = typeOfDog.Split(" ");
                     if (splitTypeOfDog.Length != 2)
                     {
-                        await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist");
+                        await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist!");
                         return;
                     }           
                     string breed = splitTypeOfDog[0];
                     string subBreed = splitTypeOfDog[1];
-                    string messageWithBreedAndSubBreed = client.DownloadString("https://dog.ceo/api/breed/" + subBreed + "/" + breed + "/images");
+                    string messageWithBreedAndSubBreed = "";
+                    try
+                    {
+                        messageWithBreedAndSubBreed = client.DownloadString("https://dog.ceo/api/breed/" + subBreed + "/" + breed + "/images");
+                    }
+                    catch(Exception e)
+                    {
+                        await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist!");
+                        return;
+                    }
                     var resultWithBreedAndSubBreed = JsonConvert.DeserializeObject<SpecificDogPics.RootObject>(messageWithBreedAndSubBreed);
                     Random picture = new Random();
                     int indexOfPicture = picture.Next(0, resultWithBreedAndSubBreed.message.Count);
@@ -442,8 +451,18 @@ namespace botTesting
                 }
                 else
                 {
-                    string messageWithBreed = client.DownloadString("https://dog.ceo/api/breed/" + typeOfDog + "/images");
+                    string messageWithBreed= "";
+                    try
+                    {
+                        messageWithBreed = client.DownloadString("https://dog.ceo/api/breed/" + typeOfDog + "/images");
+                    }
+                    catch(Exception e)
+                    {
+                        await Context.Channel.SendMessageAsync("Dog does not exist!");
+                        return;
+                    }
                     var resultWithBreed = JsonConvert.DeserializeObject<SpecificDogPics.RootObject>(messageWithBreed);
+                    Console.WriteLine(resultWithBreed.ToString());
                     Random picture = new Random();
                     int indexOfPicture = picture.Next(0, resultWithBreed.message.Count);
                     Embed.WithImageUrl(resultWithBreed.message.ElementAt(indexOfPicture));

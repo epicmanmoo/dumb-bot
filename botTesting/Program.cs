@@ -15,8 +15,6 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
-        public static List<string> JoinMsgList = new List<string>();
-        public static List<string> LeaveMsgList = new List<string>();
         public static string prefix = "!";
         static void Main(string[] args)
         {
@@ -52,17 +50,24 @@ namespace botTesting
             await Task.Delay(-1);
         }
 
-        //Maybe make it so that if a command is spelled incorrectly but is similar to a command
-        //that exists then tell the user the right way to type the command?
         private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext Context, IResult result)
         {
-            //Make better error messages so user knows what they did wrong
+            SocketGuildUser Admin = Context.User as SocketGuildUser;
+            bool isAdmin = Admin.GuildPermissions.Administrator;
             if (result.Error.Equals(CommandError.ParseFailed))
             {
                 if (command.Value.Name.Equals("loop"))
                 {
-                    await Context.Channel.SendMessageAsync("Use `!loop <amount> <input>`");
-                    return;
+                    if (isAdmin)
+                    {
+                        await Context.Channel.SendMessageAsync("Use `!loop <amount> <input>`");
+                        return;
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("You are not a mod!");
+                        return;
+                    }
                 }
                 if (command.Value.Name.Equals("give"))
                 {
@@ -70,18 +75,18 @@ namespace botTesting
                     return;
                 }
             }
-            else if (result.Error.Equals(CommandError.UnknownCommand))
+            if (result.Error.Equals(CommandError.UnknownCommand))
             {
                 await Context.Channel.SendMessageAsync("That command does not exist");
             }
-            else if (result.Error.Equals(CommandError.ObjectNotFound))
+            if (result.Error.Equals(CommandError.ObjectNotFound))
             {
                 if (command.Value.Name.Equals("give"))
                 {
                     await Context.Channel.SendMessageAsync("User does not exist.");
                 }
             }
-            else if (result.Error.Equals(CommandError.BadArgCount))
+            if (result.Error.Equals(CommandError.BadArgCount))
             {
                 if (command.Value.Name.Equals("buydogs"))
                 {
@@ -89,7 +94,6 @@ namespace botTesting
                     return;
                 }
             }
-            //etc errors...
         }
 
         private async Task Client_Log(LogMessage Message)
@@ -104,50 +108,11 @@ namespace botTesting
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
-            using (var DbContext = new SQLiteDBContext())
-            {
-                SocketGuild guild = Context.Guild as SocketGuild;
-                int members = guild.MemberCount;
-                string sMembers = members.ToString();
-                //567602259102531594
-                var channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
-                Random Random = new Random();
-                int Rand = Random.Next(JoinMsgList.Count);
-                if (sMembers.Equals("1"))
-                {
-                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}st");
-                    return;
-                }
-                else if (sMembers.Equals("2") || sMembers.EndsWith("2"))
-                {
-                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}nd");
-                    return;
-                }
-                else if (sMembers.Equals("3") || sMembers.EndsWith("3"))
-                {
-                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}rd");
-                    return;
-                }
-                else if (sMembers.Equals("11"))
-                {
-                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}st");
-                    return;
-                }
-                else
-                {
-                    await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}th");
-                    return;
-                }
-            }
+            await Context.Channel.SendMessageAsync($"{User.Nickname ?? User.Username} has joined");
         }
 
         public async Task AnnounceLeavingUser(SocketGuildUser User)
         {
-            //567604758106472448
-            var Channel = Client.GetChannel(565413968643096578) as SocketTextChannel;
-            Random Rand = new Random();
-            int randIndex = Rand.Next(LeaveMsgList.Count);
-            await Channel.SendMessageAsync($"{User} has left. " + LeaveMsgList[randIndex]);
             using (var DbContext = new SQLiteDBContext())
             {
                 if (DbContext.Stones.Where(x => x.UserId == User.Id).Count() == 1)

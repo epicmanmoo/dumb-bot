@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace botTesting.Currency
 {
 
-    public class Stones : ModuleBase<SocketCommandContext>
+    public class MoneyStuff : ModuleBase<SocketCommandContext>
     {
         public static List<DateTimeOffset> workTimer = new List<DateTimeOffset>();
         public static List<SocketGuildUser> workTarget = new List<SocketGuildUser>();
