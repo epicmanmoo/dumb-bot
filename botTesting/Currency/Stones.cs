@@ -84,44 +84,59 @@ namespace botTesting.Currency
                 }
             }
             [Command("give")]
-            public async Task Give(SocketGuildUser User = null, int Amount = 0)
+            public async Task Give(string User, int Amount = 0)
             {
+                if (User.IndexOf('@') == -1 || User.Replace("<", "").Replace(">", "").Length != User.Length - 2)
+                {
+                    await Context.Channel.SendMessageAsync("User does not exist!");
+                    return;
+                }
+
+                string idStr = User.Replace("<", "").Replace(">", "").Replace("@", "");
+                IUser xo;
+                try
+                {
+                    ulong id = ulong.Parse(idStr);
+                    xo = await Context.Channel.GetUserAsync(id);
+                    Console.WriteLine(xo);
+                }
+                catch
+                {
+                    await Context.Channel.SendMessageAsync("Can't send money to a bot!");
+                    throw new Exception("Error");
+                }
                 using (var DbContext = new SQLiteDBContext())
                 {
+                    SocketGuildUser oUser = xo as SocketGuildUser;
                     SocketGuildUser You = Context.User as SocketGuildUser;
                     Stone sMoney = DbContext.Stones.Where(x => x.UserId == Context.User.Id).FirstOrDefault();
-                    Stone tMoney = DbContext.Stones.Where(x => x.UserId == User.Id).FirstOrDefault();
-                    await CreateUserInTable(User);
+                    Stone tMoney = DbContext.Stones.Where(x => x.UserId == oUser.Id).FirstOrDefault();
+                    await CreateUserInTable(oUser);
                     await CreateUserInTable(You);
                     int Money = sMoney.Amount;
                     if (!(Money < Amount))
                     {
                         if (Amount < 0)
                         {
-                            await Context.Channel.SendMessageAsync("Can't give negative money :rage:");
+                            await Context.Channel.SendMessageAsync("Can't give negative money");
                             return;
                         }
-                        if (User == null)
+                        if (oUser == null)
                         {
-                            await Context.Channel.SendMessageAsync("Who tf should I give money to?");
+                            await Context.Channel.SendMessageAsync("Who should I give money to?");
                             return;
                         }
-                        if (User.IsBot)
+                        if (oUser == Context.User)
                         {
-                            await Context.Channel.SendMessageAsync("Stop trying to give money to robots :rage:");
-                            return;
-                        }
-                        if (User == Context.User)
-                        {
-                            await Context.Channel.SendMessageAsync("**TF??** You can't give money to yourself :angry:");
+                            await Context.Channel.SendMessageAsync("You can't give money to yourself :wink:");
                             return;
                         }
                         if (Amount == 0)
                         {
-                            await Context.Channel.SendMessageAsync("How much should I give bruh?");
+                            await Context.Channel.SendMessageAsync("How much should I give?");
                             return;
                         }
-                        await Context.Channel.SendMessageAsync($"You gave ${Amount} to {User.Username ?? User.Nickname}");
+                        await Context.Channel.SendMessageAsync($"You gave ${Amount} to {oUser.Username ?? oUser.Nickname}");
                         sMoney.Amount -= Amount;
                         tMoney.Amount += Amount;
                         await DbContext.SaveChangesAsync();

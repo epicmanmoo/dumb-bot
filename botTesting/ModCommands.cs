@@ -66,33 +66,25 @@ namespace botTesting
         [Command("kick")]
         public async Task Kick(SocketGuildUser userAccount, [Remainder] string reason = "")
         {
-            var user = Context.User as SocketGuildUser;
-            var role = (user as IGuildUser).Guild.Roles.FirstOrDefault(x => x.Name == "Owner");
-            if (!(userAccount.Roles.Contains(role)))
+            SocketGuildUser user = Context.User as SocketGuildUser;
+            if (user.GuildPermissions.Administrator)
             {
-                if (user.Roles.Contains(role))
+                if (!(reason.Equals("")))
                 {
-                    if (!(reason.Equals("")))
+                    try
                     {
-                        try
-                        {
-                            await UserExtensions.SendMessageAsync(userAccount, $"Your dumbass got kicked :joy: Reason: {reason}");
-                            await userAccount.KickAsync();
-                        }
-                        catch (Discord.Net.HttpException Ex)
-                        {
-                            Console.WriteLine(Ex.Message);
-                        }
-                        await Context.Channel.SendMessageAsync($"`{userAccount}` has been kicked. Reason: `{reason}`");
+                        await UserExtensions.SendMessageAsync(userAccount, $"Your dumbass got kicked :joy: Reason: {reason}");
+                        await userAccount.KickAsync();
                     }
-                    else
+                    catch (Discord.Net.HttpException Ex)
                     {
-                        await Context.Channel.SendMessageAsync("Include reason to kick :rolling_eyes:");
+                        Console.WriteLine(Ex.Message);
                     }
+                    await Context.Channel.SendMessageAsync($"`{userAccount}` has been kicked. Reason: `{reason}`");
                 }
                 else
                 {
-                    await Context.Channel.SendMessageAsync("Not a mod spedboi");
+                    await Context.Channel.SendMessageAsync("Include reason to kick :rolling_eyes:");
                 }
             }
             else
@@ -229,6 +221,42 @@ namespace botTesting
                 }
             }
         }
+        public async Task MuteRole()
+        {
+            SocketGuildUser User = Context.User as SocketGuildUser;
+            IRole Role = User.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
+            if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
+            {
+                await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
+                await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                await Context.Channel.SendMessageAsync(":x: Repeat command");
+                await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
+                return;
+            }
+            IEnumerable<SocketRole> Roles = Context.Guild.Roles;
+            SocketRole[] SortingArr = Roles.OrderByDescending(x => x.Position).ToArray();
+            int IndexOfMuted = 0;
+            SocketRole Temp = SortingArr[0];
+            for (int i = 0; i < SortingArr.Length; i++)
+            {
+                if (SortingArr[i].ToString().Equals("muted"))
+                {
+                    IndexOfMuted = i;
+                    break;
+                }
+            }
+            for (int i = 0; i < SortingArr.Length; i++)
+            {
+                if (SortingArr[i].IsManaged)
+                {
+                    Temp = SortingArr[i];
+                    SortingArr[i] = SortingArr[IndexOfMuted];
+                    SortingArr[IndexOfMuted] = Temp;
+                    break;
+                }
+            }
+            await Role.ModifyAsync(x => x.Position = Temp.Position);
+        }
         [Command("unmute")]
         public async Task UnMute(SocketGuildUser OtherUser)
         {
@@ -277,42 +305,6 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync($"{OtherUser} was banned");
                 await OtherUser.BanAsync();
             }
-        }
-        public async Task MuteRole()
-        {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            IRole Role = User.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
-            if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
-            {
-                await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
-                await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
-                await Context.Channel.SendMessageAsync(":x: Repeat command");
-                await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
-                return;
-            }
-            IEnumerable<SocketRole> Roles = Context.Guild.Roles;
-            SocketRole[] SortingArr = Roles.OrderByDescending(x => x.Position).ToArray();
-            int IndexOfMuted = 0;
-            SocketRole Temp = SortingArr[0];
-            for (int i = 0; i < SortingArr.Length; i++)
-            {
-                if (SortingArr[i].ToString().Equals("muted"))
-                {
-                    IndexOfMuted = i;
-                    break;
-                }
-            }
-            for (int i = 0; i < SortingArr.Length; i++)
-            {
-                if (SortingArr[i].IsManaged)
-                {
-                    Temp = SortingArr[i];
-                    SortingArr[i] = SortingArr[IndexOfMuted];
-                    SortingArr[IndexOfMuted] = Temp;
-                    break;
-                }
-            }
-            await Role.ModifyAsync(x => x.Position = Temp.Position);
         }
         //These commands below should be in a databse
         //------------------------------------------------
@@ -457,12 +449,17 @@ namespace botTesting
             }
         }
         [Command("clearleavemsgs")]
-        public async Task ClearLeaveMsgs(int index = 0)
+        public async Task ClearLeaveMsgs(string index = "0")
+        {
+
+        }
+        [Command("editleavemsgs")]
+        public async Task UpdateLeaveMsgs(int index = 0, [Remainder] string msg = "")
         {
 
         }
         //Prefix default is '!'
-        [Command("setmsgprefix")]
+        [Command("setmsgsprefix")]
         public async Task MsgPrefix(string prefix = "")
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
@@ -473,7 +470,7 @@ namespace botTesting
                 {
                     var guild = User.Guild;
                     var user = guild.GetUser(565048969206693888);
-                    string nickname = user.Nickname;                
+                    string nickname = user.Nickname;
                     Program.prefix = prefix;
                     await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + nickNameOfBot);
                     //await Bot.ModifyAsync(x => x.Username = "[" + Program.prefix + "] " + nameOfBot);

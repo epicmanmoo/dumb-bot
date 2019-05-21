@@ -59,18 +59,15 @@ namespace botTesting
             //Make better error messages so user knows what they did wrong
             if (result.Error.Equals(CommandError.ParseFailed))
             {
-                SocketGuildUser User = Context.User as SocketGuildUser;
-                if (User.GuildPermissions.Administrator)
+                if (command.Value.Name.Equals("loop"))
                 {
-                    if (command.Value.Name.Equals("loop"))
-                    {
-                        await Context.Channel.SendMessageAsync("Go back and reread how to loop");
-                        return;
-                    }
+                    await Context.Channel.SendMessageAsync("Use `!loop <amount> <input>`");
+                    return;
                 }
-                else
+                if (command.Value.Name.Equals("give"))
                 {
-                    await Context.Channel.SendMessageAsync("Not a mod retard");
+                    await Context.Channel.SendMessageAsync("Use `!give <user> <money>`");
+                    return;
                 }
             }
             else if (result.Error.Equals(CommandError.UnknownCommand))
@@ -81,7 +78,7 @@ namespace botTesting
             {
                 if (command.Value.Name.Equals("give"))
                 {
-                    await Context.Channel.SendMessageAsync("Either the user does not exist or the usage of the command was incorrect");
+                    await Context.Channel.SendMessageAsync("User does not exist.");
                 }
             }
             else if (result.Error.Equals(CommandError.BadArgCount))
@@ -104,7 +101,7 @@ namespace botTesting
         {
             await Client.SetGameAsync("with your feelings");
         }
-        
+
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
             using (var DbContext = new SQLiteDBContext())
@@ -120,7 +117,7 @@ namespace botTesting
                 {
                     await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}st");
                     return;
-                }   
+                }
                 else if (sMembers.Equals("2") || sMembers.EndsWith("2"))
                 {
                     await channel.SendMessageAsync($"{User.Mention} has joined! " + JoinMsgList[Rand] + $". You are the {sMembers}nd");
