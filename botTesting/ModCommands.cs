@@ -43,9 +43,24 @@ namespace botTesting
                 return;
             }
         }
-        public async Task CreateGuildInTable(SocketGuild GuildId)
+        public async Task CreateGuildInTable(ulong GuildId)
         {
-            //adds guild and other info preliminarily (is that a word?)
+            using(var DbContext = new SQLiteDBContext())
+            {
+                if(DbContext.Spclcmds.Where(x => x.GuildId == GuildId).Count() < 1)
+                {
+                    DbContext.Add(new SpecificCMDS
+                    {
+                        GuildId = GuildId,
+                        Joinmsgs = "",
+                        Leavemsgs = "",
+                        MsgPrefix = "!",
+                        NameOfBot = "Retard Bot"
+                    });
+                    await DbContext.SaveChangesAsync();
+                }
+                return;
+            }
         }
         [Command("serverinvite")]
         public async Task ServerInvite(ulong GuildId)
@@ -53,7 +68,7 @@ namespace botTesting
             SocketGuildUser CheckUser = Context.User as SocketGuildUser;
             if (!(CheckUser.GuildPermissions.Administrator))
             {
-                await Context.Channel.SendMessageAsync("You are not a bot moderator dumbass :stuck_out_tongue:");
+                await Context.Channel.SendMessageAsync("You are not a mod!");
                 return;
             }
 
@@ -95,7 +110,7 @@ namespace botTesting
             }
             else
             {
-                await Context.Channel.SendMessageAsync("Why would you create an invite for your server while on your own server");
+                await Context.Channel.SendMessageAsync("Why would you create an invite for your server while on your own server?");
             }
         }
         [Command("kick")]
@@ -312,7 +327,8 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("Not a mod retard");
             }
         }
-        [Command("ban")]//make it better, send user a message for why, etc.
+        //make this command better!
+        [Command("ban")]
         public async Task Ban(SocketGuildUser OtherUser)
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
@@ -322,136 +338,130 @@ namespace botTesting
                 await OtherUser.BanAsync();
             }
         }
-        //These commands below should be in a databse
-        //------------------------------------------------
+  
+        //USING DB FOR BELOW-------------------------
         [Command("addjoinmsg")]
         public async Task SetJoinMsg([Remainder] string msg = "")
         {
-            using (var DbContext = new SQLiteDBContext())
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-                
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if (!msg.Equals(""))
+                    {
+                        scmds.Joinmsgs += msg + weirdString;
+                        await Context.Channel.SendMessageAsync($"Join message, `{msg}`, stored");
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Enter a join message to store!");
+                    }
+                    await DbContext.SaveChangesAsync();
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
             }
         }
         [Command("clearjoinmsgs")]
         public async Task ClearJoinMsgs(string index = "0")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-
-            if (User.GuildPermissions.Administrator)
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-                if (Program.JoinMsgList.Count == 0)
+                using (var DbContext = new SQLiteDBContext())
                 {
-                    await Context.Channel.SendMessageAsync("No messages to be removed!");
-                    return;
+                    string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if (scmds.Joinmsgs.Length == 0)
+                    {
+                        await Context.Channel.SendMessageAsync("No join messages in list!");
+                        return;
+                    }
+                    string[] parsejoinmsgs = scmds.Joinmsgs.Split(weirdString);
+                    if (index.Equals("all"))
+                    {
+                        scmds.Joinmsgs = scmds.Joinmsgs.Replace(scmds.Joinmsgs, "");
+                        await Context.Channel.SendMessageAsync("All join messages deleted");
+                    }
+                    else
+                    {
+                        int iIndex = int.Parse(index) - 1;
+                        if (iIndex < 0 || iIndex > parsejoinmsgs.Length)
+                        {
+                            await Context.Channel.SendMessageAsync("Invalid index");
+                        }
+                        string thisjoinmsg = parsejoinmsgs[iIndex] + weirdString;
+                        scmds.Joinmsgs = scmds.Joinmsgs.Replace(thisjoinmsg, "");
+                        await Context.Channel.SendMessageAsync($"Join message, `{thisjoinmsg.Substring(0, thisjoinmsg.Length - weirdString.Length)}` deleted");
+                    }
+                    await DbContext.SaveChangesAsync();
                 }
-                if (index.Equals("all"))
-                {
-                    Program.JoinMsgList.Clear();
-                    await Context.Channel.SendMessageAsync("All messages removed!");
-                    return;
-                }
-                int parsedIndex = Int32.Parse(index);
-                if (parsedIndex > Program.JoinMsgList.Count)
-                {
-                    await Context.Channel.SendMessageAsync("That index does not exist!");
-                    return;
-                }
-                else if (parsedIndex > 0)
-                {
-                    await Context.Channel.SendMessageAsync("`" + Program.JoinMsgList[parsedIndex - 1] + "`" + " removed from join message list");
-                    Program.JoinMsgList.RemoveAt(parsedIndex - 1);
-                    return;
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("Enter a valid index or type ``all`` to remove all!");
-                    return;
-                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
             }
         }
         [Command("joinmsgs")]
         public async Task ShowJoinMsgs()
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-                EmbedBuilder Embed = new EmbedBuilder();
-                Embed.WithTitle("**Join Messages**");
-                if (Program.JoinMsgList.Count == 0)
+                using (var DbContext = new SQLiteDBContext())
                 {
-                    await Context.Channel.SendMessageAsync("No join messages in list");
-                    return;
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if(scmds.Joinmsgs.Length > 0)
+                    {
+                        string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
+                        string[] parsejoinmsgs = scmds.Joinmsgs.Split(weirdString);
+                        EmbedBuilder embed = new EmbedBuilder();
+                        embed.WithTitle("**List of Join Messages**");
+                        embed.WithColor(Color.DarkMagenta);
+                        for(int i= 0; i < parsejoinmsgs.Length - 1; i++)
+                        {
+                            embed.AddField($"Index {i+1}: ", parsejoinmsgs[i], true);
+                            Console.WriteLine(parsejoinmsgs.Length);
+                            if (i+2 != parsejoinmsgs.Length)
+                            {
+                                embed.AddField("\u200b", "\u200b");
+                            }
+                        }
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("No join messages in list!");
+                        return;
+                    }
                 }
-                for (int i = 0; i < Program.JoinMsgList.Count; i++)
-                {
-                    Embed.WithColor(40, 200, 150);
-                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.JoinMsgList[i]);
-                }
-                await Context.Channel.SendMessageAsync("", false, Embed.Build());
             }
         }
         [Command("editjoinmsgs")]
         public async Task EditJoinMsgs(int index = 0, [Remainder] string Msg = "")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            using (var DbContext = new SQLiteDBContext())
             {
-                if (!Msg.Equals(""))
-                {
-                    if (index > 0)
-                    {
-                        Program.JoinMsgList[index - 1] = Msg;
-                        await Context.Channel.SendMessageAsync("Updated join message at index " + index);
-                    }
-                }
-            }
-        }
-        [Command("leavemsgs")]
-        public async Task LeaveMsgs()
-        {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
-            {
-                EmbedBuilder Embed = new EmbedBuilder();
-                Embed.WithTitle("**Leave Messages**");
-                if (Program.JoinMsgList.Count == 0)
-                {
-                    await Context.Channel.SendMessageAsync("No leave messages in list");
-                    return;
-                }
-                for (int i = 0; i < Program.LeaveMsgList.Count; i++)
-                {
-                    Embed.WithColor(40, 200, 150);
-                    Embed.AddField("Index " + (i + 1) + ":", "• " + Program.LeaveMsgList[i]);
-                }
-                await Context.Channel.SendMessageAsync("", false, Embed.Build());
+
             }
         }
         [Command("addleavemsg")]
         public async Task AddLeaveMsg([Remainder] string msg = "")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            using (var DbContext = new SQLiteDBContext())
             {
-                if (!msg.Equals(""))
-                {
-                    if (!Program.LeaveMsgList.Contains(msg))
-                    {
-                        Program.LeaveMsgList.Add(msg);
-                        await Context.Channel.SendMessageAsync("`" + msg + "`" + "message added to leave message list");
-                        return;
-                    }
-                    else
-                    {
-                        await Context.Channel.SendMessageAsync("Leave message already exists");
-                        return;
-                    }
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("Enter a valid message");
-                    return;
-                }
+
             }
         }
         [Command("clearleavemsgs")]
@@ -459,60 +469,60 @@ namespace botTesting
         {
 
         }
+        [Command("leavemsgs")]
+        public async Task LeaveMsgs()
+        {
+            using (var DbContext = new SQLiteDBContext())
+            {
+
+            }
+        }
         [Command("editleavemsgs")]
         public async Task UpdateLeaveMsgs(int index = 0, [Remainder] string msg = "")
         {
+            using (var DbContext = new SQLiteDBContext())
+            {
 
+            }
         }
-        //Prefix default is '!'
         [Command("setmsgsprefix")]
         public async Task MsgPrefix(string prefix = "")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            using (var DbContext = new SQLiteDBContext())
             {
-                if (!prefix.Equals(""))
-                {
-                    var guild = User.Guild;
-                    var user = guild.GetUser(565048969206693888);
-                    string nickname = user.Nickname;
-                    Program.prefix = prefix;
-                    await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + nickNameOfBot);
-                    await Context.Channel.SendMessageAsync("Command prefix set to `" + prefix + "`");
-                    return;
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("Enter a prefix!");
-                }
+
             }
         }
         [Command("changebotnickname")]
         public async Task ChangeBotNickName([Remainder] String name = "")
         {
-            SocketGuildUser User = Context.User as SocketGuildUser;
-            if (User.GuildPermissions.Administrator)
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-                if (!name.Equals(""))
+                using (var DbContext = new SQLiteDBContext())
                 {
-                    var guild = User.Guild;
-                    var user = guild.GetUser(565048969206693888);
-                    string nickname = user.Nickname;
-                    if (name.Equals(nickname))
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    var Bot = guild.GetUser(565048969206693888);
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if (!name.Equals(""))
                     {
-                        await Context.Channel.SendMessageAsync("That is my current nickname!");
-                        return;
+                        scmds.NameOfBot = name;
+                        await Bot.ModifyAsync(x => x.Nickname = scmds.NameOfBot);
+                        await Context.Channel.SendMessageAsync($"My name has been changed to `{name}`");
                     }
-                    nickNameOfBot = name;
-                    await user.ModifyAsync(x => x.Nickname = "[" + Program.prefix + "] " + name);
-                    await Context.Channel.SendMessageAsync($"My nickname has been changed to `{name}`!");
-                }
-                else
-                {
-                    await Context.Channel.SendMessageAsync("Enter a nickname!");
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Enter a valid nickname for the bot!");
+                    }
+                    await DbContext.SaveChangesAsync();
                 }
             }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+            }
         }
-        //------------------------------------------------
+        //-----------------------------------------------
     }
 }

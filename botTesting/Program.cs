@@ -15,7 +15,6 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
-        public static string prefix = "!";
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
@@ -103,7 +102,7 @@ namespace botTesting
 
         private async Task Client_Ready()
         {
-            await Client.SetGameAsync("with your feelings");
+            await Client.SetGameAsync("!help");
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
@@ -131,13 +130,12 @@ namespace botTesting
             if (Context.Message == null || Context.Message.Content == "") return;
             if (Context.User.Username.Equals("Retard Bot")) return;
             int ArgPos = 0;
-            if (!(Message.HasStringPrefix(prefix, ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
+            if (!(Message.HasStringPrefix("!", ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
             var Result = await Commands.ExecuteAsync(Context, ArgPos, null);
             if (!Result.IsSuccess)
             {
                 Console.WriteLine($"{DateTime.Now} at Commands] Something went wrong Text: {Context.Message.Content} | Error: {Result.ErrorReason}");
             }
-
         }
     }
 }

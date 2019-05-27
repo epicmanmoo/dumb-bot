@@ -109,7 +109,6 @@ namespace botTesting
             ["Japanese"] = "ja",
             ["Malay"] = "ms"
         };
-
         [Command("hello")]
         public async Task Hello()
         {
