@@ -11,6 +11,7 @@ namespace botTesting
 {
     public class ModCommands : ModuleBase<SocketCommandContext>
     {
+        public readonly string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
         public async Task CreateUserInTable(SocketGuildUser OtherUser = null)
         {
             using (var DbContext = new SQLiteDBContext())
@@ -349,7 +350,6 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     SocketGuild guild = Context.Guild as SocketGuild;
-                    string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
                     await CreateGuildInTable(guild.Id);
                     SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
                     if (!msg.Equals(""))
@@ -377,7 +377,6 @@ namespace botTesting
             {
                 using (var DbContext = new SQLiteDBContext())
                 {
-                    string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
                     SocketGuild guild = Context.Guild as SocketGuild;
                     await CreateGuildInTable(guild.Id);
                     SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
@@ -424,7 +423,6 @@ namespace botTesting
                     SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
                     if(scmds.Joinmsgs.Length > 0)
                     {
-                        string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
                         string[] parsejoinmsgs = scmds.Joinmsgs.Split(weirdString);
                         EmbedBuilder embed = new EmbedBuilder();
                         embed.WithTitle("**List of Join Messages**");
@@ -478,7 +476,7 @@ namespace botTesting
             }
         }
         [Command("editleavemsgs")]
-        public async Task UpdateLeaveMsgs(int index = 0, [Remainder] string msg = "")
+        public async Task EditLeaveMsgs(int index = 0, [Remainder] string msg = "")
         {
             using (var DbContext = new SQLiteDBContext())
             {
@@ -488,9 +486,31 @@ namespace botTesting
         [Command("setmsgsprefix")]
         public async Task MsgPrefix(string prefix = "")
         {
-            using (var DbContext = new SQLiteDBContext())
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS msgPrefix = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if(prefix.Contains(" "))
+                    {
+                        await Context.Channel.SendMessageAsync("Prefix cannot contain spaces!");
+                        return;
+                    }
+                    if (!prefix.Equals(""))
+                    {
+                        msgPrefix.MsgPrefix = prefix;
+                        await DbContext.SaveChangesAsync();
+                        await Context.Channel.SendMessageAsync($"Message prefix has been set to `{prefix}`");
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Message prefix cannot be empty!");
+                        return;
+                    }
+                }
             }
         }
         [Command("changebotnickname")]
