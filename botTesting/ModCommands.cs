@@ -356,17 +356,19 @@ namespace botTesting
                     {
                         scmds.Joinmsgs += msg + weirdString;
                         await Context.Channel.SendMessageAsync($"Join message, `{msg}`, stored");
+                        await DbContext.SaveChangesAsync();
                     }
                     else
                     {
                         await Context.Channel.SendMessageAsync("Enter a join message to store!");
+                        return;
                     }
-                    await DbContext.SaveChangesAsync();
                 }
             }
             else
             {
                 await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
         [Command("clearjoinmsgs")]
@@ -397,6 +399,7 @@ namespace botTesting
                         if (iIndex < 0 || iIndex > parsejoinmsgs.Length)
                         {
                             await Context.Channel.SendMessageAsync("Invalid index");
+                            return;
                         }
                         string thisjoinmsg = parsejoinmsgs[iIndex] + weirdString;
                         scmds.Joinmsgs = scmds.Joinmsgs.Replace(thisjoinmsg, "");
@@ -408,6 +411,7 @@ namespace botTesting
             else
             {
                 await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
         [Command("joinmsgs")]
@@ -430,7 +434,6 @@ namespace botTesting
                         for(int i= 0; i < parsejoinmsgs.Length - 1; i++)
                         {
                             embed.AddField($"Index {i+1}: ", parsejoinmsgs[i], true);
-                            Console.WriteLine(parsejoinmsgs.Length);
                             if (i+2 != parsejoinmsgs.Length)
                             {
                                 embed.AddField("\u200b", "\u200b");
@@ -445,27 +448,138 @@ namespace botTesting
                     }
                 }
             }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
+            }
         }
         [Command("editjoinmsgs")]
-        public async Task EditJoinMsgs(int index = 0, [Remainder] string Msg = "")
+        public async Task EditJoinMsgs(int index = 0, [Remainder] string msg = "")
         {
-            using (var DbContext = new SQLiteDBContext())
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    await CreateGuildInTable(guild.Id);
+                    SpecificCMDS edit = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if(edit.Joinmsgs.Length > 0)
+                    {
+                        string[] psmsgs = edit.Joinmsgs.Split(weirdString);
+                        if(index >=1 && index < psmsgs.Length)
+                        {
+                            if (!msg.Equals(""))
+                            {
+                               string msgtoedit = psmsgs[index-1] + weirdString;
+                               edit.Joinmsgs = edit.Joinmsgs.Replace(msgtoedit, msg + weirdString);
+                               await DbContext.SaveChangesAsync();
+                               await Context.Channel.SendMessageAsync($"Join msg `{msgtoedit.Substring(0, msgtoedit.Length - weirdString.Length)}` changed to `{msg}`");
+                            }
+                            else
+                            {
+                                await Context.Channel.SendMessageAsync("Message cannot be empty!");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            await Context.Channel.SendMessageAsync("Invalid index");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("No join messages to edit!");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
         [Command("addleavemsg")]
         public async Task AddLeaveMsg([Remainder] string msg = "")
         {
-            using (var DbContext = new SQLiteDBContext())
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SocketGuild guild = Context.Guild as SocketGuild;
+                    await CreateGuildInTable(guild.Id);
+                    if (!msg.Equals(""))
+                    {
+                        SpecificCMDS lmsg = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                        lmsg.Leavemsgs += msg + weirdString;
+                        await Context.Channel.SendMessageAsync($"Leave msg, {msg} stored");
+                        await DbContext.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Message cannot be empty!");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
         [Command("clearleavemsgs")]
         public async Task ClearLeaveMsgs(string index = "0")
         {
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
+            {
+                SocketGuild guild = Context.Guild as SocketGuild;
+                await CreateGuildInTable(guild.Id);
+                using (var DbContext = new SQLiteDBContext())
+                {
+                    SpecificCMDS lmsgs = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                    if (lmsgs.Leavemsgs.Length > 0)
+                    {
+                        if (index.Equals("all"))
+                        {
+                            lmsgs.Leavemsgs = lmsgs.Leavemsgs.Replace(lmsgs.Leavemsgs, "");
+                            await Context.Channel.SendMessageAsync("All leave messages removed");
+                            return;
+                        }
+                        else
+                        {
+                            int iindex = int.Parse(index);
+                            string[] slmsgs = lmsgs.Joinmsgs.Split(weirdString);
+                            if (iindex > 0 || (iindex < slmsgs.Length))
+                            {
 
+                            }
+                            else
+                            {
+                                await Context.Channel.SendMessageAsync("Invalid index");
+                                return;
+                            }
+
+
+                        }
+                    }
+                    else
+                    {
+                        await Context.Channel.SendMessageAsync("Leave message list empty.");
+                        return;
+                    }
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
+            }
         }
         [Command("leavemsgs")]
         public async Task LeaveMsgs()
@@ -512,6 +626,11 @@ namespace botTesting
                     }
                 }
             }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
+            }
         }
         [Command("changebotnickname")]
         public async Task ChangeBotNickName([Remainder] String name = "")
@@ -541,6 +660,7 @@ namespace botTesting
             else
             {
                 await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
         //-----------------------------------------------

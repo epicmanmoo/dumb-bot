@@ -450,7 +450,7 @@ namespace botTesting
                 }
                 else
                 {
-                    string messageWithBreed= "";
+                    string messageWithBreed;
                     try
                     {
                         messageWithBreed = client.DownloadString("https://dog.ceo/api/breed/" + typeOfDog + "/images");
