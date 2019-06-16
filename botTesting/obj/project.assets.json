@@ -2,6 +2,20 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v2.1": {
+      "Discord.Addons.Interactive/1.0.1": {
+        "type": "package",
+        "dependencies": {
+          "Discord.Net.Commands": "1.0.1",
+          "Discord.Net.WebSocket": "1.0.1",
+          "NETStandard.Library": "1.6.1"
+        },
+        "compile": {
+          "lib/netstandard1.1/Discord.Addons.Interactive.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.1/Discord.Addons.Interactive.dll": {}
+        }
+      },
       "Discord.Net/2.0.1": {
         "type": "package",
         "dependencies": {
@@ -1877,6 +1891,18 @@
     }
   },
   "libraries": {
+    "Discord.Addons.Interactive/1.0.1": {
+      "sha512": "jpLtwySgRtkng2DVu8Q0ZKQjCUW9WpxEJ62eqwO1LYmnqrnhFl0mbRz7HlJCJiWay4FsS3vap3pixW+sXE4Y+Q==",
+      "type": "package",
+      "path": "discord.addons.interactive/1.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "discord.addons.interactive.1.0.1.nupkg.sha512",
+        "discord.addons.interactive.nuspec",
+        "lib/netstandard1.1/Discord.Addons.Interactive.dll"
+      ]
+    },
     "Discord.Net/2.0.1": {
       "sha512": "r/CXx4rFmYuwrLqB4fgvAXHVOH/lQ21/fOMn1HrkxFoAQy309z/RSJWA7mJgPbkGSJYhGwtfr5CzS6rSOtsHyw==",
       "type": "package",
@@ -6203,6 +6229,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.1": [
+      "Discord.Addons.Interactive >= 1.0.1",
       "Discord.Net >= 2.0.1",
       "Discord.Net.Commands >= 2.0.1",
       "FluentScheduler >= 5.3.0",
@@ -6256,6 +6283,10 @@
     "frameworks": {
       "netcoreapp2.1": {
         "dependencies": {
+          "Discord.Addons.Interactive": {
+            "target": "Package",
+            "version": "[1.0.1, )"
+          },
           "Discord.Net": {
             "target": "Package",
             "version": "[2.0.1, )"

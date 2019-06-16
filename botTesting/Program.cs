@@ -7,6 +7,8 @@ using Discord.Commands;
 using System.Linq;
 using System.Collections.Generic;
 using FluentScheduler;
+using Microsoft.Extensions.DependencyInjection;
+using Discord.Addons.Interactive;
 
 namespace botTesting
 {
@@ -15,6 +17,7 @@ namespace botTesting
 
         private DiscordSocketClient Client;
         private CommandService Commands;
+        private IServiceProvider services;
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();
@@ -36,8 +39,13 @@ namespace botTesting
                 LogLevel = LogSeverity.Debug
             });
 
+            services = new ServiceCollection()
+            .AddSingleton(Client)
+            .AddSingleton<InteractiveService>()
+            .BuildServiceProvider();
+            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+
             Client.MessageReceived += Client_MessageReceived;
-            await Commands.AddModulesAsync(Assembly.GetEntryAssembly(), null);
             Client.Ready += Client_Ready;
             Commands.CommandExecuted += Commands_CommandExecutedAsync;
             Client.UserJoined += AnnounceJoinedUser;
@@ -131,7 +139,7 @@ namespace botTesting
             if (Context.User.Username.Equals("Retard Bot")) return;
             int ArgPos = 0;
             if (!(Message.HasStringPrefix("!", ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
-            var Result = await Commands.ExecuteAsync(Context, ArgPos, null);
+            var Result = await Commands.ExecuteAsync(Context, ArgPos, services);
             if (!Result.IsSuccess)
             {
                 Console.WriteLine($"{DateTime.Now} at Commands] Something went wrong Text: {Context.Message.Content} | Error: {Result.ErrorReason}");

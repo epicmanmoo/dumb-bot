@@ -553,7 +553,7 @@ namespace botTesting
                         }
                         else
                         {
-                            int iindex = int.Parse(index);
+                            int iindex = int.Parse(index) - 1;
                             string[] slmsgs = lmsgs.Joinmsgs.Split(weirdString);
                             if (iindex > 0 || (iindex < slmsgs.Length))
                             {
@@ -563,9 +563,7 @@ namespace botTesting
                             {
                                 await Context.Channel.SendMessageAsync("Invalid index");
                                 return;
-                            }
-
-
+                            }                        
                         }
                     }
                     else
