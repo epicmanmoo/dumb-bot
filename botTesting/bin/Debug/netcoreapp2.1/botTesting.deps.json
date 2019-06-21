@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.1",
-    "signature": "fc33bbee59d0b020c632d10ed1d671cd4158d37b"
+    "signature": "04043c69ae29fb498aac6be2203d30dc551c940a"
   },
   "compilationOptions": {},
   "targets": {
@@ -11,6 +11,7 @@
           "Discord.Addons.Interactive": "1.0.1",
           "Discord.Net": "2.0.1",
           "Discord.Net.Commands": "2.0.1",
+          "DiscordRichPresence": "1.0.108",
           "FluentScheduler": "5.3.0",
           "HtmlAgilityPack": "1.11.4",
           "Microsoft.EntityFrameworkCore.Design": "2.2.4",
@@ -101,6 +102,17 @@
           "lib/netstandard2.0/Discord.Net.WebSocket.dll": {
             "assemblyVersion": "2.0.1.0",
             "fileVersion": "2.0.1.0"
+          }
+        }
+      },
+      "DiscordRichPresence/1.0.108": {
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.2"
+        },
+        "runtime": {
+          "lib/net35/DiscordRPC.dll": {
+            "assemblyVersion": "1.0.108.0",
+            "fileVersion": "1.0.108.0"
           }
         }
       },
@@ -1293,6 +1305,13 @@
       "sha512": "sha512-qxBuN+SMtwo9BkOIYiiZKnTQkhdhaQIuiw+HJJj1Cn34G5PBiFLs2r0aBJvAsFmveWFlz16eoz4DVQG0SP6bVw==",
       "path": "discord.net.websocket/2.0.1",
       "hashPath": "discord.net.websocket.2.0.1.nupkg.sha512"
+    },
+    "DiscordRichPresence/1.0.108": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zxGu/OETftiuc4XSRfzeEKSzs32QeQP+76lHSPZowv0gF+0AmJtzUSPIwko45kx7/FOdzNl50gTrHCHFxTSCyA==",
+      "path": "discordrichpresence/1.0.108",
+      "hashPath": "discordrichpresence.1.0.108.nupkg.sha512"
     },
     "FluentScheduler/5.3.0": {
       "type": "package",

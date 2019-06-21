@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Addons.Interactive;
+using DiscordRPC;
+using DiscordRPC.Logging;
 
 namespace botTesting
 {
@@ -18,6 +20,7 @@ namespace botTesting
         private DiscordSocketClient Client;
         private CommandService Commands;
         private IServiceProvider services;
+
         static void Main(string[] args)
         {
             new Program().MainAsync().GetAwaiter().GetResult();

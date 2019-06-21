@@ -35,11 +35,11 @@ namespace botTesting
             await ReplyAndDeleteAsync("this message will delete in 10 seconds", timeout: TimeSpan.FromSeconds(10));
             return Ok();
         }
-        [Command("paginator")]
-        public async Task Test_Paginator()
-        {
-            var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
-            await PagedReplyAsync(pages);
-        }
+        //[Command("paginator")]
+        //public async Task Test_Paginator()
+        //{
+        //    var pages = new[] { "Page 1", "Page 2", "Page 3", "aaaaaa", "Page 5" };
+        //    await PagedReplyAsync(pages);
+        //}
     }
 }

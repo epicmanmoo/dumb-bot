@@ -92,6 +92,18 @@
           "lib/netstandard2.0/Discord.Net.WebSocket.dll": {}
         }
       },
+      "DiscordRichPresence/1.0.108": {
+        "type": "package",
+        "dependencies": {
+          "Newtonsoft.Json": "12.0.2"
+        },
+        "compile": {
+          "lib/net35/DiscordRPC.dll": {}
+        },
+        "runtime": {
+          "lib/net35/DiscordRPC.dll": {}
+        }
+      },
       "FluentScheduler/5.3.0": {
         "type": "package",
         "compile": {
@@ -1993,6 +2005,20 @@
         "lib/netstandard1.3/Discord.Net.WebSocket.xml",
         "lib/netstandard2.0/Discord.Net.WebSocket.dll",
         "lib/netstandard2.0/Discord.Net.WebSocket.xml"
+      ]
+    },
+    "DiscordRichPresence/1.0.108": {
+      "sha512": "zxGu/OETftiuc4XSRfzeEKSzs32QeQP+76lHSPZowv0gF+0AmJtzUSPIwko45kx7/FOdzNl50gTrHCHFxTSCyA==",
+      "type": "package",
+      "path": "discordrichpresence/1.0.108",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "discordrichpresence.1.0.108.nupkg.sha512",
+        "discordrichpresence.nuspec",
+        "lib/net35/DiscordRPC.dll",
+        "lib/net35/DiscordRPC.pdb",
+        "lib/net35/DiscordRPC.xml"
       ]
     },
     "FluentScheduler/5.3.0": {
@@ -6232,6 +6258,7 @@
       "Discord.Addons.Interactive >= 1.0.1",
       "Discord.Net >= 2.0.1",
       "Discord.Net.Commands >= 2.0.1",
+      "DiscordRichPresence >= 1.0.108",
       "FluentScheduler >= 5.3.0",
       "HtmlAgilityPack >= 1.11.4",
       "Microsoft.EntityFrameworkCore.Design >= 2.2.4",
@@ -6295,6 +6322,10 @@
             "target": "Package",
             "version": "[2.0.1, )"
           },
+          "DiscordRichPresence": {
+            "target": "Package",
+            "version": "[1.0.108, )"
+          },
           "FluentScheduler": {
             "target": "Package",
             "version": "[5.3.0, )"
@@ -6338,5 +6369,17 @@
         "warn": true
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'DiscordRichPresence 1.0.108' was restored using '.NETFramework,Version=v4.6.1' instead of the project target framework '.NETCoreApp,Version=v2.1'. This package may not be fully compatible with your project.",
+      "libraryId": "DiscordRichPresence",
+      "targetGraphs": [
+        ".NETCoreApp,Version=v2.1"
+      ]
+    }
+  ]
 }
