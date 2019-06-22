@@ -8,7 +8,7 @@ namespace botTesting
     public class Interactive : InteractiveBase<SocketCommandContext>
     {
         [Command("next", RunMode = RunMode.Async)]
-        public async Task Test_NextMessageAsync()
+        public async Task CoolMessage()
         {
             await ReplyAsync("What is 2+2?");
             var response = await NextMessageAsync(timeout: TimeSpan.FromSeconds(5));
@@ -29,11 +29,12 @@ namespace botTesting
                 await ReplyAsync("You did not reply before the timeout");
             }
         }
-        [Command("delete")]
-        public async Task<RuntimeResult> Test_DeleteAfterAsync()
+        [Command("delete", RunMode = RunMode.Async)]
+        public async Task DeleteMessage()
         {
-            await ReplyAndDeleteAsync("this message will delete in 10 seconds", timeout: TimeSpan.FromSeconds(10));
-            return Ok();
+            var message = await ReplyAndDeleteAsync("Ok", timeout: TimeSpan.FromSeconds(10));
+            await Task.Delay(5000);
+            await message.ModifyAsync(x => x.Content = "Meghan you suck");
         }
         //[Command("paginator")]
         //public async Task Test_Paginator()
