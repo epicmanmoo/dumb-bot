@@ -85,15 +85,12 @@ namespace botTesting
                     return;
                 }
             }
-            if (result.Error.Equals(CommandError.UnknownCommand))
-            {
-                await Context.Channel.SendMessageAsync("That command does not exist");
-            }
             if (result.Error.Equals(CommandError.ObjectNotFound))
             {
                 if (command.Value.Name.Equals("give"))
                 {
                     await Context.Channel.SendMessageAsync("User does not exist.");
+                    return;
                 }
             }
             if (result.Error.Equals(CommandError.BadArgCount))
@@ -101,6 +98,11 @@ namespace botTesting
                 if (command.Value.Name.Equals("buydogs"))
                 {
                     await Context.Channel.SendMessageAsync("Please provide the number of dogs you want to buy");
+                    return;
+                }
+                if (command.Value.Name.Equals("lyrics"))
+                {
+                    await Context.Channel.SendMessageAsync("Format is `!lyrics <author> <song>`. Surround authors with quotes if the name is longer than one word!");
                     return;
                 }
             }

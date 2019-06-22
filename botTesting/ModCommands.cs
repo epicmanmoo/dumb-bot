@@ -185,7 +185,7 @@ namespace botTesting
             }
             else
             {
-                await Context.Channel.SendMessageAsync("Not a mod retard");
+                await Context.Channel.SendMessageAsync("Not a mod");
             }
         }
         [Command("clearwarns")]
@@ -257,7 +257,7 @@ namespace botTesting
         {
             SocketGuildUser User = Context.User as SocketGuildUser;
             IRole Role = User.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
-            if (!User.Guild.Roles.Contains(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted")))
+            if (!User.Guild.Roles.Contains(Role))
             {
                 await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
                 await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));

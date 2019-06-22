@@ -489,7 +489,16 @@ namespace botTesting
             var fAuthor = Uri.EscapeDataString(author);
             var fSong = Uri.EscapeDataString(song);
             WebClient client = new WebClient();
-            string value = client.DownloadString("https://api.lyrics.ovh/v1/" + fAuthor + "/" + fSong);
+            string value;
+            try
+            {
+                value = client.DownloadString("https://api.lyrics.ovh/v1/" + fAuthor + "/" + fSong);
+            }
+            catch(Exception e)
+            {
+                await Context.Channel.SendMessageAsync("Lyrics not available or song does not exist!");
+                return;
+            }
             var result = JsonConvert.DeserializeObject<Lyrics.RootObject>(value);
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
