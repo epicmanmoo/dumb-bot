@@ -483,68 +483,6 @@ namespace botTesting
         {
             await Context.Channel.SendMessageAsync("https://dog.ceo/dog-api/breeds-list to view a list of breeds and subreeds");
         }
-        [Command("weather")]
-        public async Task Weather([Remainder] string city = "")
-        {
-            //https://www.metaweather.com/api/#location use this website for weather?
-        }
-        [Command("javadef")]
-        public async Task JavaDef([Remainder] string Word = "")
-        {
-            if (!Word.Equals(""))
-            {
-                string term1;
-                string term2;
-                EmbedBuilder Embed = new EmbedBuilder();
-                Embed.WithAuthor("Definition", Context.User.GetAvatarUrl());
-                Embed.WithFooter(Context.User.Username);
-                Embed.WithCurrentTimestamp();
-                Embed.WithColor(Color.DarkBlue);
-                HtmlWeb web = new HtmlWeb();
-                HtmlDocument document;
-                if (Word.Contains(" "))
-                {
-                    string[] splitWord = Word.Split(" ");
-                    if (splitWord.Length != 2)
-                    {
-                        await Context.Channel.SendMessageAsync("Term does not exist");
-                        return;
-                    }
-                    term1 = splitWord[0];
-                    term2 = splitWord[1];
-                    document = web.Load("https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm");
-                    string websiteToDisplayName = "https://www.tutorialspoint.com/java/java_" + term1 + "_" + term2 + ".htm";
-                    Embed.WithTitle("More info on ``" + term1 + " " + term2 + "`` here");
-                    Embed.WithUrl(websiteToDisplayName);
-                }
-                else
-                {
-                    document = web.Load("https://www.tutorialspoint.com/java/java_" + Word + ".htm");
-                    string websiteToDisplayName = "https://www.tutorialspoint.com/java/java_" + Word + ".htm";
-                    Embed.WithTitle("More info on ``" + Word + "`` here");
-                    Embed.WithUrl(websiteToDisplayName);
-                }
-                if (document.DocumentNode.SelectSingleNode("//p").InnerText.Contains("not found"))
-                {
-                    await Context.Channel.SendMessageAsync("Term does not exist");
-                    return;
-                }
-                string meaning = "";
-                for (int i = 0; i < 2; i++)
-                {
-                    meaning += " " + WebUtility.HtmlDecode(document.DocumentNode.SelectNodes("//p").ElementAt(i).InnerText);
-                }
-                Embed.WithDescription(meaning);
-                await Context.Channel.SendMessageAsync("", false, Embed.Build());
-                return;
-            }
-            await Context.Channel.SendMessageAsync("Enter a phrase to search (use !javadefs to list all phrases)");
-        }
-        [Command("javadefs")]
-        public async Task JavaDefs()
-        {
-            //Lists all defs on the site
-        }
         [Command("lyrics")]
         public async Task Lyrics(string author, [Remainder] string song)
         {
@@ -576,5 +514,11 @@ namespace botTesting
             }
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
+        [Command("weather")]
+        public async Task Weather([Remainder] string city = "")
+        {
+            //https://www.metaweather.com/api/#location use this website for weather?
+        }
+        //scrape oracle website
     }
 }

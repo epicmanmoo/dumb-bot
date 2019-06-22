@@ -1,7 +1,10 @@
 ﻿using System;
+using System.Collections;
 using System.Threading.Tasks;
 using Discord.Addons.Interactive;
 using Discord.Commands;
+using Discord.WebSocket;
+using DiscordRPC;
 
 namespace botTesting
 {
@@ -32,9 +35,24 @@ namespace botTesting
         [Command("delete", RunMode = RunMode.Async)]
         public async Task DeleteMessage()
         {
-            var message = await ReplyAndDeleteAsync("Ok", timeout: TimeSpan.FromSeconds(10));
+            SocketGuild guild = Context.Guild as SocketGuild;
+            var users = guild.Users.GetEnumerator();
+            string[] ppl = new string[guild.Users.Count - 1];
+            int index = 0;
+            foreach (var user in guild.Users)
+            {
+                if (!user.IsBot)
+                {
+                    ppl[index] = user.Mention;
+                    index++;
+                }
+            }
+            Console.WriteLine(index);
+            Random rand = new Random();
+            int nrand = rand.Next(ppl.Length);
+            var message = await ReplyAndDeleteAsync("Test", timeout: TimeSpan.FromSeconds(10));
             await Task.Delay(5000);
-            await message.ModifyAsync(x => x.Content = "Meghan you suck");
+            await message.ModifyAsync(x => x.Content = ppl[nrand]);
         }
         //[Command("paginator")]
         //public async Task Test_Paginator()

@@ -702,7 +702,7 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     SocketGuild guild = Context.Guild as SocketGuild;
-                    var Bot = guild.GetUser(565048969206693888);
+                    var Bot = guild.GetUser(guild.CurrentUser.Id);
                     await CreateGuildInTable(guild.Id);
                     SpecificCMDS scmds = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
                     if (!name.Equals(""))
