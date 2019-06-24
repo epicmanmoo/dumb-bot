@@ -658,7 +658,7 @@ namespace botTesting
                 return;
             }
         }
-        [Command("setmsgsprefix")]
+        [Command("setmsgprefix")]
         public async Task MsgPrefix(string prefix = "")
         {
             SocketGuildUser You = Context.User as SocketGuildUser;
@@ -667,9 +667,10 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     SocketGuild guild = Context.Guild as SocketGuild;
+                    DiscordSocketClient cli = Context.Client as DiscordSocketClient;
                     await CreateGuildInTable(guild.Id);
                     SpecificCMDS msgPrefix = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
-                    if(prefix.Contains(" "))
+                    if(prefix.Contains("\\s"))
                     {
                         await Context.Channel.SendMessageAsync("Prefix cannot contain spaces!");
                         return;
@@ -678,6 +679,7 @@ namespace botTesting
                     {
                         msgPrefix.MsgPrefix = prefix;
                         await DbContext.SaveChangesAsync();
+                        await cli.SetGameAsync("[" + prefix + "]help");
                         await Context.Channel.SendMessageAsync($"Message prefix has been set to `{prefix}`");
                     }
                     else

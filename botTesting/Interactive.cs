@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using Discord.Addons.Interactive;
 using Discord.Commands;
 using Discord.WebSocket;
-using DiscordRPC;
 
 namespace botTesting
 {
@@ -17,14 +16,24 @@ namespace botTesting
             var response = await NextMessageAsync(timeout: TimeSpan.FromSeconds(5));
             if (response != null)
             {
-                int respint = int.Parse(response.ToString());
-                if (respint == 4)
+                try
                 {
-                    await ReplyAsync("Good job!");
+                    int respint = int.Parse(response.ToString());
+                    if (respint == 4)
+                    {
+                        await ReplyAsync("Good job!");
+                    }
+                    else
+                    {
+                        await ReplyAsync($"Incorrect :frowning:");
+                    }
                 }
-                else
+                catch(Exception e)
                 {
-                    await ReplyAsync($"Incorrect :frowning:");
+                    if (response.ToString()[0] != '!')
+                    {
+                        await ReplyAsync("That is not a number!");
+                    }
                 }
             }
             else
@@ -47,7 +56,6 @@ namespace botTesting
                     index++;
                 }
             }
-            Console.WriteLine(index);
             Random rand = new Random();
             int nrand = rand.Next(ppl.Length);
             var message = await ReplyAndDeleteAsync("Test", timeout: TimeSpan.FromSeconds(10));

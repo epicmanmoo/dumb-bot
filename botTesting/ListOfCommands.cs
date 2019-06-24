@@ -8,6 +8,7 @@ using System.Linq;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using HtmlAgilityPack;
+using Discord.WebSocket;
 
 namespace botTesting
 {
@@ -213,9 +214,6 @@ namespace botTesting
             }
         }
         //todo: send top defintion by default (count thumbs up), if user wants rand then allow random
-        //also, maybe split "[" or "("?
-        //make it so empty fields (example, author, def, etc.) are not shown
-        //scrape urban dictionary for word of the day??
         [Command("define")]
         public async Task Define([Remainder] string Word = "")
         {
@@ -431,7 +429,7 @@ namespace botTesting
                     }           
                     string breed = splitTypeOfDog[0];
                     string subBreed = splitTypeOfDog[1];
-                    string messageWithBreedAndSubBreed = "";
+                    string messageWithBreedAndSubBreed;
                     try
                     {
                         messageWithBreedAndSubBreed = client.DownloadString("https://dog.ceo/api/breed/" + subBreed + "/" + breed + "/images");
@@ -461,7 +459,6 @@ namespace botTesting
                         return;
                     }
                     var resultWithBreed = JsonConvert.DeserializeObject<SpecificDogPics.RootObject>(messageWithBreed);
-                    Console.WriteLine(resultWithBreed.ToString());
                     Random picture = new Random();
                     int indexOfPicture = picture.Next(0, resultWithBreed.message.Count);
                     Embed.WithImageUrl(resultWithBreed.message.ElementAt(indexOfPicture));
@@ -526,8 +523,77 @@ namespace botTesting
         [Command("weather")]
         public async Task Weather([Remainder] string city = "")
         {
-            //https://www.metaweather.com/api/#location use this website for weather?
+            WebClient client = new WebClient();
+            if (!city.Equals(""))
+            {
+                long woeid = 0;
+                try
+                {
+                    var epiccity = Uri.EscapeUriString(city);
+                    string dum = client.DownloadString("https://www.metaweather.com/api/location/search/?query=" + epiccity);
+                    string woeinfo = dum.Replace("[", "").Replace("]", "");
+                    int count = 0;
+                    int index5 = 0;
+                    for (int i = 0; i < woeinfo.Length; i++)
+                    {
+                        if(woeinfo[i] == ',')
+                        {
+                            count++;
+                            if(count == 5)
+                            {
+                                index5 = i;
+                            }
+                        }
+                    }
+                    if (count > 5)
+                    {
+                        var deswoeinfo = JsonConvert.DeserializeObject<WOE.RootObject>(woeinfo.Substring(0, index5));
+                        woeid = deswoeinfo.woeid;
+                    }
+                    else if (count == 4)
+                    {
+                        var deswoeinfo = JsonConvert.DeserializeObject<WOE.RootObject>(woeinfo);
+                        woeid = deswoeinfo.woeid;
+                    }                
+                }
+                catch(Exception e)
+                {
+                    await Context.Channel.SendMessageAsync("That location might not be on the map or is invalid");
+                }
+                try
+                {
+                    SocketGuildUser user = Context.User as SocketGuildUser;
+                    EmbedBuilder embed = new EmbedBuilder();
+                    embed.WithAuthor("Location Info", user.GetAvatarUrl());
+                    embed.WithColor(Color.LightOrange);
+                    embed.WithFooter(user.Nickname ?? user.Username);
+                    embed.WithCurrentTimestamp();
+                    string weatherinfo = client.DownloadString("https://www.metaweather.com/api/location/" + woeid);
+                    var desweatherinfo = JsonConvert.DeserializeObject<WeatherDetails.RootObject>(weatherinfo);
+                    embed.AddField("Location", desweatherinfo.title);
+                    embed.AddField("Type", desweatherinfo.location_type);
+                    embed.AddField("Weather", desweatherinfo.consolidated_weather[0].weather_state_name);
+                    int ctof = (int) (desweatherinfo.consolidated_weather[0].the_temp * 1.8) + 32;
+                    embed.AddField("Temperature", ctof + " degrees farenheit");
+                    embed.AddField("Time Zone", desweatherinfo.timezone);
+                    await Context.Channel.SendMessageAsync("", false, embed.Build());
+                }
+                catch(Exception e)
+                {
+                   await Context.Channel.SendMessageAsync("That location might not be on the map or is invalid");
+                }
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("Enter a city!");
+                return;
+            }
         }
-        //scrape oracle website
+        [Command("time")]
+        public async Task Time([Remainder] string reg)
+        {
+            string region = Uri.EscapeUriString(reg);
+            
+        }
     }
 }

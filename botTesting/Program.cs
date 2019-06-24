@@ -9,13 +9,12 @@ using System.Collections.Generic;
 using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Addons.Interactive;
-using DiscordRPC;
-using DiscordRPC.Logging;
 
 namespace botTesting
 {
     class Program : ModuleBase<SocketCommandContext>
     {
+        public readonly string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
 
         private DiscordSocketClient Client;
         private CommandService Commands;
@@ -115,12 +114,27 @@ namespace botTesting
 
         private async Task Client_Ready()
         {
-            await Client.SetGameAsync("!help");
+            using(var DbContext = new SQLiteDBContext())
+            {
+                SocketGuild guild = Context.Guild as SocketGuild;
+                await CreateGuildInTable(guild.Id);
+                SpecificCMDS pre = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                await Client.SetGameAsync("[" + pre.MsgPrefix + "]help");
+            }
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)
         {
-            await Context.Channel.SendMessageAsync($"{User.Nickname ?? User.Username} has joined");
+            using (var DbContext = new SQLiteDBContext())
+            {
+                SocketGuild guild = Context.Guild as SocketGuild;
+                await CreateGuildInTable(guild.Id);
+                SpecificCMDS joinmsg = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                string[] sjoinmsg = joinmsg.Joinmsgs.Split(weirdString);
+                Random rand = new Random();
+                int index = rand.Next(sjoinmsg.Length);
+                await Context.Channel.SendMessageAsync($"{User.Username} has joined! {sjoinmsg[index]}");
+            }
         }
 
         public async Task AnnounceLeavingUser(SocketGuildUser User)
@@ -133,21 +147,55 @@ namespace botTesting
                     DbContext.Remove(Stone);
                     await DbContext.SaveChangesAsync();
                 }
+                SocketGuild guild = Context.Guild as SocketGuild;
+                await CreateGuildInTable(guild.Id);
+                SpecificCMDS leavemsg = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                string[] sleavemsg = leavemsg.Joinmsgs.Split(weirdString);
+                Random rand = new Random();
+                int index = rand.Next(sleavemsg.Length);
+                await Context.Channel.SendMessageAsync($"{User.Nickname ?? User.Username} has left! {sleavemsg[index]}");
             }
         }
-
+        public async Task CreateGuildInTable(ulong GuildId)
+        {
+            using (var DbContext = new SQLiteDBContext())
+            {
+                if (DbContext.Spclcmds.Where(x => x.GuildId == GuildId).Count() < 1)
+                {
+                    DbContext.Add(new SpecificCMDS
+                    {
+                        GuildId = GuildId,
+                        Joinmsgs = "",
+                        Leavemsgs = "",
+                        MsgPrefix = "!",
+                        NameOfBot = "Bot"
+                    });
+                    await DbContext.SaveChangesAsync();
+                }
+                return;
+            }
+        }
         private async Task Client_MessageReceived(SocketMessage MessageParam)
         {
             var Message = MessageParam as SocketUserMessage;
             var Context = new SocketCommandContext(Client, Message);
+            string prefix = "";
+            using (var DbContext = new SQLiteDBContext())
+            {
+                SocketGuild guild = Context.Guild as SocketGuild;
+                await CreateGuildInTable(guild.Id);
+                SpecificCMDS spref = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
+                prefix = spref.MsgPrefix;
+            }
             if (Context.Message == null || Context.Message.Content == "") return;
-            if (Context.User.Username.Equals("Retard Bot")) return;
+            if (Context.User.Username.Equals(Client.CurrentUser.Username)) return;
             int ArgPos = 0;
-            if (!(Message.HasStringPrefix("!", ref ArgPos) || Message.HasMentionPrefix(Client.CurrentUser, ref ArgPos))) return;
+            if (!(Message.HasStringPrefix(prefix, ref ArgPos))) return;
             var Result = await Commands.ExecuteAsync(Context, ArgPos, services);
+            await Client.SetGameAsync("[" + prefix + "]help");
             if (!Result.IsSuccess)
             {
-                Console.WriteLine($"{DateTime.Now} at Commands] Something went wrong Text: {Context.Message.Content} | Error: {Result.ErrorReason}");
+                Console.WriteLine($"{DateTime.Now} at Command] Something went wrong Text: {Context.Message.Content} | Error: {Result.ErrorReason}");
             }
         }
     }
