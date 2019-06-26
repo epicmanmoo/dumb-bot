@@ -589,11 +589,5 @@ namespace botTesting
                 return;
             }
         }
-        [Command("time")]
-        public async Task Time([Remainder] string reg)
-        {
-            string region = Uri.EscapeUriString(reg);
-            
-        }
     }
 }

@@ -104,6 +104,10 @@ namespace botTesting
                     await Context.Channel.SendMessageAsync("Format is `!lyrics <author> <song>`. Surround authors with quotes if the name is longer than one word!");
                     return;
                 }
+                if (command.Value.Name.Equals("time"))
+                {
+                    await Context.Channel.SendMessageAsync("If region 2 is blank, put `\"\"` as the parameter. Format: `!time <region> (Optional)<region2> <city>` Remember to seperate spaced places with a `_` so something like Los Angeles should be Los_Angeles");
+                }
             }
         }
 
