@@ -118,13 +118,7 @@ namespace botTesting
 
         private async Task Client_Ready()
         {
-            using(var DbContext = new SQLiteDBContext())
-            {
-                SocketGuild guild = Context.Guild as SocketGuild;
-                await CreateGuildInTable(guild.Id);
-                SpecificCMDS pre = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();
-                await Client.SetGameAsync("[" + pre.MsgPrefix + "]help");
-            }
+            await Client.SetGameAsync("[!]help");
         }
 
         public async Task AnnounceJoinedUser(SocketGuildUser User)

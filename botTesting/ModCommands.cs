@@ -726,5 +726,16 @@ namespace botTesting
                 return;
             }
         }
+        [Command("userstates")]
+        public async Task UserStates()
+        {
+            SocketGuild guild = Context.Guild as SocketGuild;
+            var users = guild.Users.GetEnumerator();
+            Dictionary<string, int> us = new Dictionary<string, int>();
+            foreach (var user in guild.Users)
+            {
+                
+            }
+        }
     }
-}
+}   
