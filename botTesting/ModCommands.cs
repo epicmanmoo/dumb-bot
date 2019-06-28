@@ -729,12 +729,49 @@ namespace botTesting
         [Command("userstates")]
         public async Task UserStates()
         {
-            SocketGuild guild = Context.Guild as SocketGuild;
-            var users = guild.Users.GetEnumerator();
-            Dictionary<string, int> us = new Dictionary<string, int>();
-            foreach (var user in guild.Users)
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
             {
-                
+                SocketGuild guild = Context.Guild as SocketGuild;
+                int offline = 0, online = 0, idle = 0, afk = 0, dnd = 0;
+                foreach (var user in guild.Users)
+                {
+                    if (!user.IsBot)
+                    {
+                        switch (user.Status)
+                        {
+                            case UserStatus.Offline:
+                                offline++;
+                                break;
+                            case UserStatus.Online:
+                                online++;
+                                break;
+                            case UserStatus.Idle:
+                                idle++;
+                                break;
+                            case UserStatus.AFK:
+                                afk++;
+                                break;
+                            case UserStatus.DoNotDisturb:
+                                dnd++;
+                                break;
+                        }
+                    }
+                }
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.WithTitle("**User States**");
+                embed.AddField("Offline Count", offline);
+                embed.AddField("Online Count", online);
+                embed.AddField("Idle Count", idle);
+                embed.AddField("AFK Count", afk);
+                embed.AddField("Do Not Disturb Count", dnd);
+                embed.WithColor(Color.DarkBlue);
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("You're not a mod!");
+                return;
             }
         }
     }

@@ -589,5 +589,10 @@ namespace botTesting
                 return;
             }
         }
+        [Command("userinfo")]
+        public async Task UserInfo(SocketGuildUser user)
+        {
+           
+        }   
     }
 }
