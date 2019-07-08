@@ -235,7 +235,7 @@ namespace botTesting
                     String fixedDate = month + "/" + day + "/" + year;
                     EmbedBuilder Embed = new EmbedBuilder();
                     Embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
-                    Embed.WithTitle("**Information from**" + result.list.ElementAt(nextRand).permalink);
+                    Embed.WithTitle("**Information from** " + result.list.ElementAt(nextRand).permalink);
                     Embed.WithColor(40, 200, 150);
                     Embed.AddField("Author: ", result.list.ElementAt(nextRand).author);
                     Embed.AddField("Word: ", result.list.ElementAt(nextRand).word);
@@ -352,7 +352,7 @@ namespace botTesting
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithColor(40, 200, 150);
                 embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
-                if ((monthOfWOD.Trim().Equals(monthNow.Trim())) && (dayOfWOD == dayNow))
+                if (dayOfWOD == dayNow)
                 {
                     embed.WithTitle("**Urban Dictionary's Word Of The Day!**");
                 }

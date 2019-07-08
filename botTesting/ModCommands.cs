@@ -770,5 +770,47 @@ namespace botTesting
                 return;
             }
         }
+        [Command("purge")]
+        public async Task Purge(int num = 0)
+        {
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            if (You.GuildPermissions.Administrator)
+            {
+                if (!(num <= 0) && (num < 100))
+                {
+                    IEnumerable<IMessage> messages = await Context.Channel.GetMessagesAsync(num+1).FlattenAsync();
+                    int count = messages.Count();
+                    if(count == 0)
+                    {
+                        await Context.Channel.SendMessageAsync("No messages to delete!");
+                        return;
+                    }
+                    await ((ITextChannel)Context.Channel).DeleteMessagesAsync(messages);
+                    IUserMessage msg;
+                    if(num == 1)
+                    {
+                        msg = await ReplyAsync($"Deleted 1 message!");
+                    }
+                    else
+                    {
+                        if (num > count)
+                        {
+                            msg = await ReplyAsync($"Deleted all messages in this channel!");
+                        }
+                        else
+                        {
+                            msg = await ReplyAsync($"Deleted {num} messages!");
+                        }
+                    }
+                    await Task.Delay(3000);
+                    await msg.DeleteAsync();
+                }
+                else
+                {
+                    await Context.Channel.SendMessageAsync("Enter a valid number of messages to delete (max is 99)");
+                    return;
+                }
+            }
+        }
     }
 }   
