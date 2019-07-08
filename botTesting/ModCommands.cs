@@ -733,7 +733,7 @@ namespace botTesting
             if (You.GuildPermissions.Administrator)
             {
                 SocketGuild guild = Context.Guild as SocketGuild;
-                int offline = 0, online = 0, idle = 0, afk = 0, dnd = 0;
+                int offline = 0, online = 0, idle = 0, dnd = 0;
                 foreach (var user in guild.Users)
                 {
                     if (!user.IsBot)
@@ -749,9 +749,6 @@ namespace botTesting
                             case UserStatus.Idle:
                                 idle++;
                                 break;
-                            case UserStatus.AFK:
-                                afk++;
-                                break;
                             case UserStatus.DoNotDisturb:
                                 dnd++;
                                 break;
@@ -763,7 +760,6 @@ namespace botTesting
                 embed.AddField("Offline Count", offline);
                 embed.AddField("Online Count", online);
                 embed.AddField("Idle Count", idle);
-                embed.AddField("AFK Count", afk);
                 embed.AddField("Do Not Disturb Count", dnd);
                 embed.WithColor(Color.DarkBlue);
                 await Context.Channel.SendMessageAsync("", false, embed.Build());

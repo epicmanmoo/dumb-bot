@@ -592,7 +592,7 @@ namespace botTesting
         [Command("userinfo")]
         public async Task UserInfo(SocketGuildUser user)
         {
-                    
+            
         }   
     }
 }

@@ -45,7 +45,6 @@ namespace botTesting
         public async Task DeleteMessage()
         {
             SocketGuild guild = Context.Guild as SocketGuild;
-            var users = guild.Users.GetEnumerator();
             string[] ppl = new string[guild.Users.Count - 1];
             int index = 0;
             foreach (var user in guild.Users)
