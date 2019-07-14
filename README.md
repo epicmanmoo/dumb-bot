@@ -1,5 +1,3 @@
 # DiscordBot
 
-## Not Complete
-
-### Learning how to use a bot to interact with users
+## A bot that's helpful in a server, I hope...
