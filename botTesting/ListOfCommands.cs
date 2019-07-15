@@ -9,6 +9,7 @@ using Newtonsoft.Json;
 using System.Collections.Generic;
 using HtmlAgilityPack;
 using Discord.WebSocket;
+using System.Reflection;
 
 namespace botTesting
 {
@@ -647,10 +648,5 @@ namespace botTesting
                 return;
             }
         }   
-        [Command("color")]
-        public async Task Color()
-        {
-
-        }
     }
 }

@@ -4,6 +4,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -34,6 +35,7 @@ namespace botTesting
                 }
             }
         }
+        //todo: check if already signed up
         [Command("signup", RunMode = RunMode.Async)]
         public async Task SignUp()
         {
@@ -44,15 +46,15 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
-                    await ReplyAsync($"You will begin signing up shortly {Context.User.Username}! Type `No` to any question you do not want to answer!");
+                    await ReplyAsync($"You will begin signing up shortly **{Context.User.Username}**! Type `No` to any question you do not want to answer!");
                     await Task.Delay(2500);
-                    await ReplyAsync("How old are you?");
+                    await ReplyAsync("`How old are you?`");
                     var ageobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(10));
                     if(ageobj != null)
                     {
                         if (ageobj.ToString().ToLower().StartsWith("no"))
                         {
-                            welcome.age = -1;
+                            welcome.age = -2;
                         }
                         else
                         {
@@ -67,7 +69,7 @@ namespace botTesting
                             }
                         }
                     }
-                    await ReplyAsync("What is your name, or nickname");
+                    await ReplyAsync("`What is your name, or nickname`");
                     var nameobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(15));
                     if (nameobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -77,7 +79,7 @@ namespace botTesting
                     {
                         welcome.name = nameobj.ToString();
                     }
-                    await ReplyAsync("Where are you from?");
+                    await ReplyAsync("`Where are you from?`");
                     var locobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(15));
                     if (locobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -87,7 +89,7 @@ namespace botTesting
                     {
                         welcome.location = locobj.ToString();
                     }
-                    await ReplyAsync("Describe yourself in 3 sentences or less!");
+                    await ReplyAsync("`Describe yourself in a few sentences!`");
                     var descobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(300));
                     if (descobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -97,7 +99,7 @@ namespace botTesting
                     {
                         welcome.desc = descobj.ToString();
                     }
-                    await ReplyAsync("What are your plurals?");
+                    await ReplyAsync("`What are your plurals?`");
                     var plurobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(60));
                     if (plurobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -107,7 +109,7 @@ namespace botTesting
                     {
                         welcome.plurals = plurobj.ToString();
                     }
-                    await ReplyAsync("What is your favorite food?");
+                    await ReplyAsync("`What is your favorite food?`");
                     var foodobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (foodobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -117,7 +119,7 @@ namespace botTesting
                     {
                         welcome.favfood = foodobj.ToString();
                     }
-                    await ReplyAsync("Lastly, what is your favorite color?");
+                    await ReplyAsync("`Lastly, what is your favorite color?`");
                     var colorobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(15));
                     if (colorobj.ToString().ToLower().StartsWith("no"))
                     {
@@ -131,14 +133,29 @@ namespace botTesting
                     await ReplyAsync("Your information is being prepared!");
                     await DbContext.SaveChangesAsync();
                     await Task.Delay(2000);
-                    EmbedBuilder embed = new EmbedBuilder();
-                    embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
-                    embed.WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Tux.png/220px-Tux.png");
-                    embed.WithTitle("**User Details**");
-                    embed.WithDescription($"**Age**: {welcome.age}\n**Name/Nickname**: {welcome.name}\n**Location**: {welcome.location}\n**Descritpion**: {welcome.desc}\n" +
-                        $"**Plurals**: {welcome.plurals}\n**Favorite Food**: {welcome.favfood}\n**Favorite Color**: {welcome.favcolor}");
-                    await ReplyAsync("", false, embed.Build());
+                    await EmbedSender(Context.User.Id);
                 }
+            }
+        }
+        //[Command("update")]
+        //[Comamnd("view")]
+        //[Command("delete")]
+
+        public async Task EmbedSender(ulong id)
+        {
+            using (var DbContext = new SQLiteDBContext())
+            {
+                Welcome welcome = DbContext.welcomes.Where(x => x.userid == id).FirstOrDefault();
+                EmbedBuilder embed = new EmbedBuilder();
+                System.Drawing.Color c = System.Drawing.Color.FromName(welcome.favcolor);
+                embed.WithAuthor(Context.User.Username, Context.User.GetAvatarUrl());
+                embed.WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Tux.png/220px-Tux.png");
+                embed.WithTitle("**User Details**");
+                embed.WithColor(c.R, c.G, c.B);
+                string agenum = welcome.age < 0 ? "Not Provided" : welcome.age.ToString();
+                embed.WithDescription($"**Age** {agenum}" + $"\n**Name/Nickname**: {welcome.name}\n**Location**: {welcome.location}\n**Descritpion**: {welcome.desc}\n" +
+                    $"**Plurals**: {welcome.plurals}\n**Favorite Food**: {welcome.favfood}\n**Favorite Color**: {welcome.favcolor}");
+                await ReplyAsync("", false, embed.Build());
             }
         }
     }
