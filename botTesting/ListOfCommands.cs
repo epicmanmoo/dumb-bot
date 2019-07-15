@@ -600,7 +600,7 @@ namespace botTesting
                 embed.WithColor(Color.Blue);
                 if(You.Id == user.Id)
                 {
-                    embed.WithFooter("Requested by yourself :stuck_out_tongue:");
+                    embed.WithFooter("Requested by yourself ;)");
                 }
                 else
                 {

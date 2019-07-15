@@ -125,6 +125,14 @@ namespace botTesting
         {
             using (var DbContext = new SQLiteDBContext())
             {
+                if(DbContext.welcomes.Where(x => x.userid == User.Id).Count() < 1)
+                {
+                    DbContext.Add(new Welcome
+                    {
+                        userid = User.Id
+                    });
+                    await DbContext.SaveChangesAsync();
+                }
                 SocketGuild guild = Context.Guild as SocketGuild;
                 await CreateGuildInTable(guild.Id);
                 SpecificCMDS joinmsg = DbContext.Spclcmds.Where(x => x.GuildId == guild.Id).FirstOrDefault();

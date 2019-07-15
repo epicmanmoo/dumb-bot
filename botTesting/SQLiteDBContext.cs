@@ -11,6 +11,7 @@ namespace botTesting
     {
         public DbSet<Stone> Stones { get; set; }
         public DbSet<SpecificCMDS> Spclcmds { get; set; }
+        public DbSet<Welcome> welcomes { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             options.UseSqlite(@"Data Source=C:\Users\mooaz\.nuget\packages\microsoft.entityframeworkcore.tools\2.2.4\tools\netcoreapp2.0\any\ef.dllDatabase.sqlite");           
