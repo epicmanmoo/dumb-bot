@@ -592,7 +592,60 @@ namespace botTesting
         [Command("userinfo")]
         public async Task UserInfo(SocketGuildUser user)
         {
-            //get user info
+            if (!user.IsBot)
+            {
+                SocketGuildUser You = Context.User as SocketGuildUser;
+                EmbedBuilder embed = new EmbedBuilder();
+                embed.WithAuthor(user.Nickname ?? user.Username, user.GetAvatarUrl());
+                embed.WithColor(Color.Blue);
+                if(You.Id == user.Id)
+                {
+                    embed.WithFooter("Requested by yourself :stuck_out_tongue:");
+                }
+                else
+                {
+                    embed.WithFooter("Requested by " + You.Username);
+                }
+                string ca = user.CreatedAt.ToString();
+                string ja = user.JoinedAt.ToString();
+                int tempca = 0;
+                for(int i = 0; i < ca.Length; i++)
+                {
+                    if (ca[i + 1] == '+')
+                    {
+                        tempca = i;
+                        break;
+                    }
+                    else continue;
+                }
+                int tempja = 0;
+                for (int i = 0; i < ja.Length; i++)
+                {
+                    if (ja[i + 1] == '+')
+                    {
+                        tempja = i;
+                        break;
+                    }
+                    else continue;
+                }
+                embed.AddField("Created Account: ", ca.Substring(0, tempca));
+                embed.AddField("Joined Server: ", ja.Substring(0, tempja));
+                embed.AddField("Status: ", user.Status);
+                embed.AddField("ID: ", user.Id);
+                embed.AddField("Username: ", user.Username);
+                if(!(user.Nickname == null))
+                {
+                    embed.AddField("Nickname: ", user.Nickname);
+                }
+                embed.AddField("Discriminator: ", user.Discriminator);
+                embed.WithImageUrl(user.GetAvatarUrl());
+                await Context.Channel.SendMessageAsync("", false, embed.Build());
+            }
+            else
+            {
+                await Context.Channel.SendMessageAsync("User must be human!");
+                return;
+            }
         }   
     }
 }
