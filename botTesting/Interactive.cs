@@ -38,7 +38,7 @@ namespace botTesting
             }
             else
             {
-                await ReplyAsync("You did not reply before the timeout");
+                await ReplyAsync("You did not reply before the timeout!");
             }
         }
         [Command("delete", RunMode = RunMode.Async)]

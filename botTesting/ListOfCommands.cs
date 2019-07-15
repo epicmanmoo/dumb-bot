@@ -647,5 +647,10 @@ namespace botTesting
                 return;
             }
         }   
+        [Command("color")]
+        public async Task Color()
+        {
+
+        }
     }
 }

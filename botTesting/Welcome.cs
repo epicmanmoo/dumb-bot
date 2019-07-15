@@ -14,6 +14,7 @@ namespace botTesting
         public string location { get; set; }
         public string desc { get; set; }
         public string plurals { get; set; }
-
+        public string favfood { get; set; }
+        public string favcolor { get; set; }
     }
 }
