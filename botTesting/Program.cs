@@ -91,6 +91,11 @@ namespace botTesting
                     await Context.Channel.SendMessageAsync("User does not exist.");
                     return;
                 }
+                if (command.Value.Name.Equals("view"))
+                {
+                    await Context.Channel.SendMessageAsync("Either the user has not signed up or does not exist!");
+                    return;
+                }
             }
             if (result.Error.Equals(CommandError.BadArgCount))
             {

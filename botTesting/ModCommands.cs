@@ -339,6 +339,7 @@ namespace botTesting
                 await OtherUser.BanAsync();
             }
         }
+        //check for duplicates on this and leave msgs!
         [Command("addjoinmsg")]
         public async Task SetJoinMsg([Remainder] string msg = "")
         {
