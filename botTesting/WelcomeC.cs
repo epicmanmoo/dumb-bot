@@ -50,7 +50,7 @@ namespace botTesting
                     await Task.Delay(2500);
                     await ReplyAsync("`How old are you?`");
                     var ageobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if(ageobj != null)
+                    if (ageobj != null)
                     {
                         if (ageobj.ToString().ToLower().StartsWith("no"))
                         {
@@ -158,7 +158,44 @@ namespace botTesting
                 }
             }
         }
-        //[Command("update")]
+        [Command("update")]
+        public async Task UpdateIntro(string field, [Remainder] string value)
+        {
+            await EmbedSender(Context.User as SocketGuildUser);
+            await ReplyAsync("Current info!");
+            using (var DbContext = new SQLiteDBContext())
+            {
+                Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
+                switch (field)
+                {
+                    case "age":
+                        if(welcome.age.GetType() == typeof(string))
+                        {
+                            try
+                            {
+                                welcome.age = int.Parse(value);
+                            }
+                            catch (FormatException e)
+                            {
+                                await ReplyAsync("That is not a number!");
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            welcome.age = -2;
+                        }
+                        break;
+                    case "desc":
+                        welcome.desc = value;
+                        break;
+                    case "favcolor":
+                        welcome.favcolor = value;
+                        break;
+                }
+                await DbContext.SaveChangesAsync();
+            }
+        }
         //[Command("delete")]
 
         public async Task EmbedSender(SocketGuildUser User)
@@ -171,10 +208,17 @@ namespace botTesting
                 embed.WithAuthor(User.Username, User.GetAvatarUrl());
                 embed.WithThumbnailUrl("https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Tux.png/220px-Tux.png");
                 embed.WithTitle("**User Details**");
-                embed.WithColor(c.R, c.G, c.B);
+                if (c.IsKnownColor)
+                {
+                    embed.WithColor(c.R, c.G, c.B);
+                }
+                else
+                {
+                    embed.WithColor(Discord.Color.DarkGrey);
+                }
                 string agenum = welcome.age < 0 ? "Not Provided" : welcome.age.ToString();
-                embed.WithDescription($"**Age** {agenum}" + $"\n**Name/Nickname**: {welcome.name}\n**Location**: {welcome.location}\n**Descritpion**: {welcome.desc}\n" +
-                    $"**Plurals**: {welcome.plurals}\n**Favorite Food**: {welcome.favfood}\n**Favorite Color**: {welcome.favcolor}");
+                embed.WithDescription($"1. **Age** {agenum}" + $"\n2. **Name/Nickname**: {welcome.name}\n3. **Location**: {welcome.location}\n4. **Descritpion**: {welcome.desc}\n" +
+                    $"5. **Plurals**: {welcome.plurals}\n**6. Favorite Food**: {welcome.favfood}\n**7. Favorite Color**: {welcome.favcolor}");
                 await ReplyAsync("", false, embed.Build());
             }
         }
