@@ -35,7 +35,6 @@ namespace botTesting
                 }
             }
         }
-        //todo: check if already signed up
         [Command("signup", RunMode = RunMode.Async)]
         public async Task SignUp()
         {
@@ -46,6 +45,11 @@ namespace botTesting
                 using (var DbContext = new SQLiteDBContext())
                 {
                     Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
+                    if(DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
+                    {
+                        await ReplyAsync("You are already signed up! To update, use `!update <item> <value>`");
+                        return;
+                    }
                     await ReplyAsync($"You will begin signing up shortly **{Context.User.Username}**! Type `No` to any question you do not want to answer!");
                     await Task.Delay(2500);
                     await ReplyAsync("`How old are you?`");
@@ -69,6 +73,7 @@ namespace botTesting
                             }
                         }
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`What is your name, or nickname`");
                     var nameobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (nameobj.ToString().ToLower().StartsWith("no"))
@@ -79,6 +84,7 @@ namespace botTesting
                     {
                         welcome.name = nameobj.ToString();
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`Where are you from?`");
                     var locobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (locobj.ToString().ToLower().StartsWith("no"))
@@ -89,6 +95,7 @@ namespace botTesting
                     {
                         welcome.location = locobj.ToString();
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`Describe yourself in a few sentences!`");
                     var descobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(300));
                     if (descobj.ToString().ToLower().StartsWith("no"))
@@ -99,6 +106,7 @@ namespace botTesting
                     {
                         welcome.desc = descobj.ToString();
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`What are your plurals?`");
                     var plurobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(60));
                     if (plurobj.ToString().ToLower().StartsWith("no"))
@@ -109,6 +117,7 @@ namespace botTesting
                     {
                         welcome.plurals = plurobj.ToString();
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`What is your favorite food?`");
                     var foodobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (foodobj.ToString().ToLower().StartsWith("no"))
@@ -119,6 +128,7 @@ namespace botTesting
                     {
                         welcome.favfood = foodobj.ToString();
                     }
+                    await Task.Delay(800);
                     await ReplyAsync("`Lastly, what is your favorite color?`");
                     var colorobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (colorobj.ToString().ToLower().StartsWith("no"))
@@ -129,7 +139,7 @@ namespace botTesting
                     {
                         welcome.favcolor = colorobj.ToString();
                     }
-                    await Task.Delay(600);
+                    await Task.Delay(800);
                     await ReplyAsync("Your information is being prepared!");
                     await DbContext.SaveChangesAsync();
                     await Task.Delay(2000);
@@ -140,15 +150,9 @@ namespace botTesting
         [Command("view")]
         public async Task View(SocketGuildUser User)
         {
-            if (User.IsBot)
-            {
-                await ReplyAsync("Bots don't need to be signed up!");
-                return;
-            }
             using (var DbContext = new SQLiteDBContext())
             {
-                int hasUser = DbContext.welcomes.Where(x => x.userid == User.Id).Count();
-                if (hasUser > 0)
+                if (DbContext.welcomes.Where(x => x.userid == User.Id).Count() > 0)
                 {
                     await EmbedSender(User);
                 }
@@ -158,27 +162,25 @@ namespace botTesting
                 }
             }
         }
+        //check for same as before?
         [Command("update")]
         public async Task UpdateIntro(string field, [Remainder] string value)
         {
-            await EmbedSender(Context.User as SocketGuildUser);
-            await ReplyAsync("Current info!");
             using (var DbContext = new SQLiteDBContext())
             {
                 Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
                 switch (field)
                 {
                     case "age":
-                        if(welcome.age.GetType() == typeof(string))
+                        if (welcome.age.GetType() != typeof(string))
                         {
                             try
                             {
                                 welcome.age = int.Parse(value);
                             }
-                            catch (FormatException e)
+                            catch(FormatException e)
                             {
                                 await ReplyAsync("That is not a number!");
-                                return;
                             }
                         }
                         else
@@ -186,14 +188,28 @@ namespace botTesting
                             welcome.age = -2;
                         }
                         break;
-                    case "desc":
+                    case "description":
                         welcome.desc = value;
                         break;
                     case "favcolor":
                         welcome.favcolor = value;
                         break;
+                    case "favfood":
+                        welcome.favfood = value;
+                        break;
+                    case "location":
+                        welcome.location = value;
+                        break;
+                    case "name":
+                        welcome.name = value;
+                        break;
+                    case "plurals":
+                        welcome.plurals = value;
+                        break;
                 }
-                await DbContext.SaveChangesAsync();
+                await Task.Delay(1000);
+                await ReplyAsync("Updates made!");
+                await DbContext.SaveChangesAsync();           
             }
         }
         //[Command("delete")]
@@ -217,7 +233,7 @@ namespace botTesting
                     embed.WithColor(Discord.Color.DarkGrey);
                 }
                 string agenum = welcome.age < 0 ? "Not Provided" : welcome.age.ToString();
-                embed.WithDescription($"1. **Age** {agenum}" + $"\n2. **Name/Nickname**: {welcome.name}\n3. **Location**: {welcome.location}\n4. **Descritpion**: {welcome.desc}\n" +
+                embed.WithDescription($"1. **Age**: {agenum}" + $"\n2. **Name/Nickname**: {welcome.name}\n3. **Location**: {welcome.location}\n4. **Descritpion**: {welcome.desc}\n" +
                     $"5. **Plurals**: {welcome.plurals}\n**6. Favorite Food**: {welcome.favfood}\n**7. Favorite Color**: {welcome.favcolor}");
                 await ReplyAsync("", false, embed.Build());
             }
