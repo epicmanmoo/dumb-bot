@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Addons.Interactive;
+using System.IO;
 
 namespace botTesting
 {
@@ -53,8 +54,9 @@ namespace botTesting
             Client.UserJoined += AnnounceJoinedUser;
             Client.Log += Client_Log;
             Client.UserLeft += AnnounceLeavingUser;
-            string Token = "NTY1MDQ4OTY5MjA2NjkzODg4.XK432A.z3Bcq5ZOsN9L_vErrmGW8hFryA8";
-            await Client.LoginAsync(TokenType.Bot, Token);
+            string[] lines = File.ReadAllLines(@"M:\token.txt");
+            string token = lines[0];
+            await Client.LoginAsync(TokenType.Bot, token);
             await Client.StartAsync();
             await Task.Delay(-1);
         }

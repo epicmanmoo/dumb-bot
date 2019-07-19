@@ -35,7 +35,7 @@ namespace botTesting
                 }
             }
         }
-        [Command("signup", RunMode = RunMode.Async)]
+        [Command("signup", RunMode = RunMode.Async)] 
         public async Task SignUp()
         {
             SocketChannel signup = Context.Guild.Channels.Where(x => x.Name.Equals("signup")).FirstOrDefault() as SocketChannel;
@@ -50,8 +50,8 @@ namespace botTesting
                         await ReplyAsync("You are already signed up! To update, use `!update <item> <value>`");
                         return;
                     }
-                    await ReplyAsync($"You will begin signing up shortly **{Context.User.Username}**! Type `No` to any question you do not want to answer!");
-                    await Task.Delay(2500);
+                    await ReplyAsync($"You will begin signing up shortly `**{Context.User.Username}**`! Type `No` to any question you do not want to answer!");
+                    await Task.Delay(3000);
                     await ReplyAsync("`How old are you?`");
                     var ageobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
                     if (ageobj != null)
@@ -171,6 +171,7 @@ namespace botTesting
                 Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
                 switch (field)
                 {
+                    case "1":
                     case "age":
                         if (welcome.age.GetType() != typeof(string))
                         {
@@ -188,21 +189,27 @@ namespace botTesting
                             welcome.age = -2;
                         }
                         break;
+                    case "2":    
                     case "description":
                         welcome.desc = value;
                         break;
+                    case "3":   
                     case "favcolor":
                         welcome.favcolor = value;
                         break;
+                    case "4":
                     case "favfood":
                         welcome.favfood = value;
                         break;
+                    case "5":
                     case "location":
                         welcome.location = value;
                         break;
+                    case "6":
                     case "name":
                         welcome.name = value;
                         break;
+                    case "7":
                     case "plurals":
                         welcome.plurals = value;
                         break;
@@ -212,7 +219,39 @@ namespace botTesting
                 await DbContext.SaveChangesAsync();           
             }
         }
-        //[Command("delete")]
+        [Command("delete")]
+        public async Task Delete()
+        {
+            SocketGuildUser You = Context.User as SocketGuildUser;
+            using (var DbContext = new SQLiteDBContext())
+            {
+                if(DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
+                {
+                    await ReplyAsync("Are you sure you want to delete your intro? Yes or No");
+                    var responseobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                    if (responseobj.ToString().ToLower().Equals("yes"))
+                    {
+                        DbContext.Remove(DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault());
+                        await DbContext.SaveChangesAsync();
+                    }
+                    else if (responseobj.ToString().ToLower().Equals("no"))
+                    {
+                        await ReplyAsync("Nothing Deleted!");
+                        return;
+                    }
+                    else
+                    {
+                        await ReplyAsync("Not a valid response!");
+                        return;
+                    }
+                }
+                else
+                {
+                    await ReplyAsync("Your intro doesn't exist yet, so you can't delete it!");
+                    return;
+                }
+            }
+        }
 
         public async Task EmbedSender(SocketGuildUser User)
         {
