@@ -1,3 +1,3 @@
-# DiscordBot
+# A weird discord bot that can help in servers
 
-## A bot that's helpful in a server, I hope...
+#### This is my first actual 'project'
