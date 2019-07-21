@@ -35,22 +35,6 @@ namespace botTesting
         {
             await Context.User.SendMessageAsync("```Here are a list of available commands:\n!help\n!hello\n!embed <phrase>\n!fuck <user>\n!avatar (Optional)<user>\n!money (Optional)<user>\n!give <user> <amount>\n!take <user> <amount>\n!store\n!work\n//!reset <user>\n!inventory\n!avatar\n!avatar <user>\n!define <term>\n!wordoftheday <# daysago>\n!javadef <term(s)>\n!translate <lang from> <lang to> text\n!languages <page #>\n!randomword\n!dogimage (Optional)<breed>(Optional)<subbreed>\n!breeds\n!lyrics <author> (surround in quotes if longer than one word) <song>\n--------------Mods--------------\n!serverinvite <guild id bot is in>\n!loop <numoftimes> <msg>\n!kick <user> <reason>\n!warn <user> <reason>\n!clearwarns <user>\n!warns <user>\n!mute <user>\n!unmute <user>\n!ban <user>\n!addjoinmsg <msg>\n!clearjoinmsgs <index (all for everything)>\n!joinmsgs\n!editjoinmsgs <index> <msg>\n!leavemsgs\n!addleavemsg <msg>\n!clearleavemsgs <index (all for everything)>\n!editleavemsg <index> <msg>\n!setmsgsprefix\n!changebotnickname <name>```");
         }
-        [Command("fuck")]
-        public async Task Fuck([Remainder] IGuildUser OtherUser)
-        {
-            if (Context.User.Equals(OtherUser))
-            {
-                await Context.Channel.SendMessageAsync(Context.User.Mention + " has fucked themselves");
-            }
-            else if (OtherUser.IsBot)
-            {
-                await Context.Channel.SendMessageAsync("No, fuck **_you_**");
-            }
-            else
-            {
-                await Context.Channel.SendMessageAsync(Context.User.Mention + " says fuck you to " + OtherUser.Mention);
-            }
-        }
 
         [Command("embed")]
         public async Task Embed([Remainder] string Input = "")
@@ -106,12 +90,14 @@ namespace botTesting
         {
             Console.WriteLine(Context.User.GetAvatarUrl());
             EmbedBuilder Embed = new EmbedBuilder();
-            Embed.WithColor(255, 0, 238);
+            Random rand = new Random();
+            System.Drawing.Color color = System.Drawing.Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
+            Embed.WithColor(color.R, color.G, color.B);
             if (User != null)
             {
                 if (User.GetAvatarUrl() == null)
                 {
-                    await Context.Channel.SendMessageAsync("No PFP for this user");
+                    await Context.Channel.SendMessageAsync("No avatar for this user");
                     return;
                 }
                 Embed.WithImageUrl(User.GetAvatarUrl());

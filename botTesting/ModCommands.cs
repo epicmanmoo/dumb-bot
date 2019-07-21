@@ -75,7 +75,7 @@ namespace botTesting
 
             if (Context.Client.Guilds.Where(x => x.Id == GuildId).Count() < 1)
             {
-                await Context.Channel.SendMessageAsync("Can't send an invite to a server I'm not in :rage:");
+                await Context.Channel.SendMessageAsync("Can't send an invite to a server I'm not in!");
                 return;
             }
 
