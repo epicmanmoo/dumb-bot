@@ -535,7 +535,10 @@ namespace botTesting
                     embed.AddField("Nickname: ", user.Nickname);
                 }
                 embed.AddField("Discriminator: ", user.Discriminator);
-                embed.WithImageUrl(user.GetAvatarUrl());
+                if (user.GetAvatarUrl() != null)
+                {
+                    embed.WithImageUrl(user.GetAvatarUrl());
+                }
                 await Context.Channel.SendMessageAsync("", false, embed.Build());
             }
             else
@@ -543,6 +546,17 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("User must be human!");
                 return;
             }
-        }   
+        }
+        [Command("catimage")]
+        public async Task CatImage()
+        {
+            WebClient client = new WebClient();
+            string catj = client.DownloadString("https://api.thecatapi.com/api/images/get?format=json&results_per_page=1");
+            Console.WriteLine(catj);
+            var catpic = JsonConvert.DeserializeObject<Cats.RootObject[]>(catj);
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithImageUrl(catpic.ElementAt(0).url);
+            await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
     }
 }
