@@ -269,10 +269,6 @@ namespace botTesting
                 {
                     embed.WithColor(c.R, c.G, c.B);
                 }
-                else
-                {
-                    embed.WithColor(Discord.Color.DarkGrey);
-                }
                 string agenum = welcome.age < 0 ? "Not Provided" : welcome.age.ToString();
                 embed.WithDescription($"1. **Age**: {agenum}" + $"\n2. **Name/Nickname**: {welcome.name}\n3. **Location**: {welcome.location}\n4. **Descritpion**: {welcome.desc}\n" +
                     $"5. **Plurals**: {welcome.plurals}\n**6. Favorite Food**: {welcome.favfood}\n**7. Favorite Color**: {welcome.favcolor}");
