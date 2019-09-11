@@ -37,117 +37,114 @@ namespace botTesting
         }
         //[Command("signuploc")]
         //
-        [Command("signup", RunMode = RunMode.Async)] 
+        [Command("signup", RunMode = RunMode.Async)]
         public async Task SignUp()
         {
-            SocketChannel signup = Context.Guild.Channels.Where(x => x.Name.Equals("signup")).FirstOrDefault() as SocketChannel;
-            if (Context.Channel.Id == signup.Id)
+            await Register(Context.User.Id);
+            using (var DbContext = new SQLiteDBContext())
             {
-                await Register(Context.User.Id);
-                using (var DbContext = new SQLiteDBContext())
+                Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
+                if (DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
                 {
-                    Welcome welcome = DbContext.welcomes.Where(x => x.userid == Context.User.Id).FirstOrDefault();
-                    if(DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
-                    {
-                        await ReplyAsync("You are already signed up! To update, use `!update <item> <value>`");
-                        return;
-                    }
-                    await ReplyAsync($"You will begin signing up shortly `**{Context.User.Username}**`! Type `No` to any question you do not want to answer!");
-                    await Task.Delay(3000);
-                    await ReplyAsync("`How old are you?`");
-                    var ageobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if (ageobj != null)
-                    {
-                        if (ageobj.ToString().ToLower().StartsWith("no"))
-                        {
-                            welcome.age = -2;
-                        }
-                        else
-                        {
-                            try
-                            {
-                                welcome.age = int.Parse(ageobj.ToString());
-                            }
-                            catch (FormatException e)
-                            {
-                                await ReplyAsync("That is not a number!");
-                                return;
-                            }
-                        }
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`What is your name, or nickname`");
-                    var nameobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if (nameobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.name = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.name = nameobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`Where are you from?`");
-                    var locobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if (locobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.location = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.location = locobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`Describe yourself in a few sentences!`");
-                    var descobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(300));
-                    if (descobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.desc = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.desc = descobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`What are your plurals?`");
-                    var plurobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(60));
-                    if (plurobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.plurals = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.plurals = plurobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`What is your favorite food?`");
-                    var foodobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if (foodobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.favfood = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.favfood = foodobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("`Lastly, what is your favorite color?`");
-                    var colorobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
-                    if (colorobj.ToString().ToLower().StartsWith("no"))
-                    {
-                        welcome.favcolor = "Not Provided";
-                    }
-                    else
-                    {
-                        welcome.favcolor = colorobj.ToString();
-                    }
-                    await Task.Delay(800);
-                    await ReplyAsync("Your information is being prepared!");
-                    await DbContext.SaveChangesAsync();
-                    await Task.Delay(2000);
-                    await EmbedSender(Context.User as SocketGuildUser);
+                    await ReplyAsync("You are already signed up! To update, use `!update <item> <value>`");
+                    return;
                 }
+                await ReplyAsync($"You will begin signing up shortly `**{Context.User.Username}**`! Type `No` to any question you do not want to answer!");
+                await Task.Delay(3000);
+                await ReplyAsync("`How old are you?`");
+                var ageobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                if (ageobj != null)
+                {
+                    if (ageobj.ToString().ToLower().StartsWith("no"))
+                    {
+                        welcome.age = -2;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            welcome.age = int.Parse(ageobj.ToString());
+                        }
+                        catch (FormatException e)
+                        {
+                            await ReplyAsync("That is not a number!");
+                            return;
+                        }
+                    }
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`What is your name, or nickname`");
+                var nameobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                if (nameobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.name = "Not Provided";
+                }
+                else
+                {
+                    welcome.name = nameobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`Where are you from?`");
+                var locobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                if (locobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.location = "Not Provided";
+                }
+                else
+                {
+                    welcome.location = locobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`Describe yourself in a few sentences!`");
+                var descobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(300));
+                if (descobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.desc = "Not Provided";
+                }
+                else
+                {
+                    welcome.desc = descobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`What are your plurals?`");
+                var plurobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(60));
+                if (plurobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.plurals = "Not Provided";
+                }
+                else
+                {
+                    welcome.plurals = plurobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`What is your favorite food?`");
+                var foodobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                if (foodobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.favfood = "Not Provided";
+                }
+                else
+                {
+                    welcome.favfood = foodobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("`Lastly, what is your favorite color?`");
+                var colorobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
+                if (colorobj.ToString().ToLower().StartsWith("no"))
+                {
+                    welcome.favcolor = "Not Provided";
+                }
+                else
+                {
+                    welcome.favcolor = colorobj.ToString();
+                }
+                await Task.Delay(800);
+                await ReplyAsync("Your information is being prepared!");
+                await DbContext.SaveChangesAsync();
+                await Task.Delay(2000);
+                await EmbedSender(Context.User as SocketGuildUser);
             }
+
         }
         [Command("view")]
         public async Task View(SocketGuildUser User)
@@ -181,7 +178,7 @@ namespace botTesting
                             {
                                 welcome.age = int.Parse(value);
                             }
-                            catch(FormatException e)
+                            catch (FormatException e)
                             {
                                 await ReplyAsync("That is not a number!");
                             }
@@ -191,11 +188,11 @@ namespace botTesting
                             welcome.age = -2;
                         }
                         break;
-                    case "2":    
+                    case "2":
                     case "description":
                         welcome.desc = value;
                         break;
-                    case "3":   
+                    case "3":
                     case "favcolor":
                         welcome.favcolor = value;
                         break;
@@ -218,7 +215,7 @@ namespace botTesting
                 }
                 await Task.Delay(1000);
                 await ReplyAsync("Updates made!");
-                await DbContext.SaveChangesAsync();           
+                await DbContext.SaveChangesAsync();
             }
         }
         [Command("delete")]
@@ -227,7 +224,7 @@ namespace botTesting
             SocketGuildUser You = Context.User as SocketGuildUser;
             using (var DbContext = new SQLiteDBContext())
             {
-                if(DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
+                if (DbContext.welcomes.Where(x => x.userid == Context.User.Id).Count() > 0)
                 {
                     await ReplyAsync("Are you sure you want to delete your intro? Yes or No");
                     var responseobj = await NextMessageAsync(timeout: TimeSpan.FromSeconds(30));
