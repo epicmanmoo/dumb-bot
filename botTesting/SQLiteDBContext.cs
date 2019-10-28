@@ -12,7 +12,6 @@ namespace botTesting
         public DbSet<Stone> Stones { get; set; }
         public DbSet<SpecificCMDS> Spclcmds { get; set; }
         public DbSet<Welcome> welcomes { get; set; }
-        public DbSet<NamingThings> namings { get; set; }
         protected override void OnConfiguring(DbContextOptionsBuilder options)
         {
             string[] lines = File.ReadAllLines(@"M:\token.txt");

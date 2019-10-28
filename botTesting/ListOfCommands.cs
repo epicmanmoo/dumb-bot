@@ -11,6 +11,9 @@ using HtmlAgilityPack;
 using Discord.WebSocket;
 using System.Reflection;
 using System.IO;
+using OpenQA.Selenium;
+using OpenQA.Selenium.Chrome;
+using System.Threading;
 
 namespace botTesting
 {
@@ -18,7 +21,99 @@ namespace botTesting
     {
         readonly SortedDictionary<string, string> langs = new SortedDictionary<string, string>
         {
-            ["Azerbaijan"] = "az",["Malayalam"] = "ml",["Albanian"] = "sq",["Maltese"] = "mt",["Amharic"] = "am",["Macedonian"] = "mk",["English"] = "en",["Maori"] = "mi",["Arabic"] = "ar",["Marathi"] = "mr",["Armenian"] = "hy",["Mari"] = "mhr",["Afrikaans"] = "af",["Mongolian"] = "mn",["Basque"] = "eu",["German"] = "de",["Bashkir"] = "ba",["Nepali"] = "ne",["Belarusian"] = "be",["Norwegian"] = "no",["Bengali"] = "bn",["Punjabi"] = "pa",["Burmese"] = "my",["Papiamento"] = "pap",["Bulgarian"] = "bg",["Persian"] = "fa",["Bosnian"] = "bs",["Polish"] = "pl",["Welsh"] = "cy",["Portuguese"] = "pt",["Hungarian"] = "hu",["Romanian"] = "ro",["Vietnamese"] = "vi",["Russian"] = "ru",["Haitian(Creole)"] = "ht",["Cebuano"] = "ceb",["Galician"] = "gl",["Serbian"] = "sr",["Dutch"] = "nl",["Sinhala"] = "si",["Hill Mari"] = "mrj",["Slovakian"] = "sk",["Greek"] = "el",["Slovenian"] = "sl",["Georgian"] = "ka",["Swahili"] = "sw",["Gujarati"] = "gu",["Sundanese"] = "su",["Danish"] = "da",["Tajik"] = "tg",["Hebrew"] = "he",["Thai"] = "th",["Yiddish"] = "yi",["Tagalog"] = "tl",["Indonesian"] = "id",["Tamil"] = "ta",["Irish"] = "ga",["Tatar"] = "tt",["Italian"] = "it",["Telugu"] = "te",["Icelandic"] = "is",["Turkish"] = "tr",["Spanish"] = "es",["Udmurt"] = "udm",["Kazakh"] = "kk",["Uzbek"] = "uz",["Kannada"] = "kn",["Ukrainian"] = "uk",["Catalan"] = "ca",["Urdu"] = "ur",["Kyrgyz"] = "ky",["Finnish"] = "fi",["Chinese"] = "zh",["French"] = "fr",["Korean"] = "ko",["Hindi"] = "hi",["Xhosa"] = "xh",["Croatian"] = "hr",["Khmer"] = "km",["Czech"] = "cs",["Laotian"] = "lo",["Swedish"] = "sv",["Latin"] = "la",["Scottish"] = "gd",["Latvian"] = "lv",["Estonian"] = "et",["Lithuanian"] = "lt",["Esperanto"] = "eo",["Luxembourgish"] = "lb",["Javanese"] = "jv", ["Malagasy"] = "mg", ["Japanese"] = "ja", ["Malay"] = "ms"
+            ["Azerbaijan"] = "az",
+            ["Malayalam"] = "ml",
+            ["Albanian"] = "sq",
+            ["Maltese"] = "mt",
+            ["Amharic"] = "am",
+            ["Macedonian"] = "mk",
+            ["English"] = "en",
+            ["Maori"] = "mi",
+            ["Arabic"] = "ar",
+            ["Marathi"] = "mr",
+            ["Armenian"] = "hy",
+            ["Mari"] = "mhr",
+            ["Afrikaans"] = "af",
+            ["Mongolian"] = "mn",
+            ["Basque"] = "eu",
+            ["German"] = "de",
+            ["Bashkir"] = "ba",
+            ["Nepali"] = "ne",
+            ["Belarusian"] = "be",
+            ["Norwegian"] = "no",
+            ["Bengali"] = "bn",
+            ["Punjabi"] = "pa",
+            ["Burmese"] = "my",
+            ["Papiamento"] = "pap",
+            ["Bulgarian"] = "bg",
+            ["Persian"] = "fa",
+            ["Bosnian"] = "bs",
+            ["Polish"] = "pl",
+            ["Welsh"] = "cy",
+            ["Portuguese"] = "pt",
+            ["Hungarian"] = "hu",
+            ["Romanian"] = "ro",
+            ["Vietnamese"] = "vi",
+            ["Russian"] = "ru",
+            ["Haitian(Creole)"] = "ht",
+            ["Cebuano"] = "ceb",
+            ["Galician"] = "gl",
+            ["Serbian"] = "sr",
+            ["Dutch"] = "nl",
+            ["Sinhala"] = "si",
+            ["Hill Mari"] = "mrj",
+            ["Slovakian"] = "sk",
+            ["Greek"] = "el",
+            ["Slovenian"] = "sl",
+            ["Georgian"] = "ka",
+            ["Swahili"] = "sw",
+            ["Gujarati"] = "gu",
+            ["Sundanese"] = "su",
+            ["Danish"] = "da",
+            ["Tajik"] = "tg",
+            ["Hebrew"] = "he",
+            ["Thai"] = "th",
+            ["Yiddish"] = "yi",
+            ["Tagalog"] = "tl",
+            ["Indonesian"] = "id",
+            ["Tamil"] = "ta",
+            ["Irish"] = "ga",
+            ["Tatar"] = "tt",
+            ["Italian"] = "it",
+            ["Telugu"] = "te",
+            ["Icelandic"] = "is",
+            ["Turkish"] = "tr",
+            ["Spanish"] = "es",
+            ["Udmurt"] = "udm",
+            ["Kazakh"] = "kk",
+            ["Uzbek"] = "uz",
+            ["Kannada"] = "kn",
+            ["Ukrainian"] = "uk",
+            ["Catalan"] = "ca",
+            ["Urdu"] = "ur",
+            ["Kyrgyz"] = "ky",
+            ["Finnish"] = "fi",
+            ["Chinese"] = "zh",
+            ["French"] = "fr",
+            ["Korean"] = "ko",
+            ["Hindi"] = "hi",
+            ["Xhosa"] = "xh",
+            ["Croatian"] = "hr",
+            ["Khmer"] = "km",
+            ["Czech"] = "cs",
+            ["Laotian"] = "lo",
+            ["Swedish"] = "sv",
+            ["Latin"] = "la",
+            ["Scottish"] = "gd",
+            ["Latvian"] = "lv",
+            ["Estonian"] = "et",
+            ["Lithuanian"] = "lt",
+            ["Esperanto"] = "eo",
+            ["Luxembourgish"] = "lb",
+            ["Javanese"] = "jv",
+            ["Malagasy"] = "mg",
+            ["Japanese"] = "ja",
+            ["Malay"] = "ms"
         };
         [Command("hello")]
         public async Task Hello()
@@ -223,7 +318,7 @@ namespace botTesting
                 languages.AddField("Shortened Form: ", langs.ElementAt(i).Value, true);
                 languages.AddField("\u200b", "\u200b");
                 languages.WithFooter(page + "/12");
-            }    
+            }
             await Context.Channel.SendMessageAsync("", false, languages.Build());
         }
         [Command("wordoftheday")]
@@ -309,7 +404,7 @@ namespace botTesting
             await Context.Channel.SendMessageAsync("**Imprecise definition:** " + meaning);
         }
         [Command("dogimage")]
-        public async Task DogImage([Remainder] string typeOfDog= "")
+        public async Task DogImage([Remainder] string typeOfDog = "")
         {
             WebClient client = new WebClient();
             EmbedBuilder Embed = new EmbedBuilder();
@@ -323,7 +418,7 @@ namespace botTesting
                     {
                         await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist!");
                         return;
-                    }           
+                    }
                     string breed = splitTypeOfDog[0];
                     string subBreed = splitTypeOfDog[1];
                     string messageWithBreedAndSubBreed;
@@ -331,7 +426,7 @@ namespace botTesting
                     {
                         messageWithBreedAndSubBreed = client.DownloadString("https://dog.ceo/api/breed/" + subBreed + "/" + breed + "/images");
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         await Context.Channel.SendMessageAsync("Dog breed or subreed does not exist!");
                         return;
@@ -350,7 +445,7 @@ namespace botTesting
                     {
                         messageWithBreed = client.DownloadString("https://dog.ceo/api/breed/" + typeOfDog + "/images");
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         await Context.Channel.SendMessageAsync("Dog does not exist!");
                         return;
@@ -388,7 +483,7 @@ namespace botTesting
             {
                 value = client.DownloadString("https://api.lyrics.ovh/v1/" + fAuthor + "/" + fSong);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 await Context.Channel.SendMessageAsync("Lyrics not available or song does not exist!");
                 return;
@@ -403,11 +498,11 @@ namespace botTesting
                 int tem = 0;
                 for (int i = 2045; i >= 0; i--)
                 {
-                  if (result.lyrics[i] == ' ')
-                  {
-                    tem = i;
-                    break;
-                  }
+                    if (result.lyrics[i] == ' ')
+                    {
+                        tem = i;
+                        break;
+                    }
                 }
                 embed.WithDescription(result.lyrics.Substring(0, tem) + "...");
             }
@@ -433,10 +528,10 @@ namespace botTesting
                     int index5 = 0;
                     for (int i = 0; i < woeinfo.Length; i++)
                     {
-                        if(woeinfo[i] == ',')
+                        if (woeinfo[i] == ',')
                         {
                             count++;
-                            if(count == 5)
+                            if (count == 5)
                             {
                                 index5 = i;
                             }
@@ -451,9 +546,9 @@ namespace botTesting
                     {
                         var deswoeinfo = JsonConvert.DeserializeObject<WOE.RootObject>(woeinfo);
                         woeid = deswoeinfo.woeid;
-                    }                
+                    }
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
                     await Context.Channel.SendMessageAsync("That location might not be on the map or is invalid");
                 }
@@ -470,14 +565,14 @@ namespace botTesting
                     embed.AddField("Location", desweatherinfo.title);
                     embed.AddField("Type", desweatherinfo.location_type);
                     embed.AddField("Weather", desweatherinfo.consolidated_weather[0].weather_state_name);
-                    int ctof = (int) (desweatherinfo.consolidated_weather[0].the_temp * 1.8) + 32;
+                    int ctof = (int)(desweatherinfo.consolidated_weather[0].the_temp * 1.8) + 32;
                     embed.AddField("Temperature", ctof + " degrees farenheit");
                     embed.AddField("Time Zone", desweatherinfo.timezone);
                     await Context.Channel.SendMessageAsync("", false, embed.Build());
                 }
-                catch(Exception e)
+                catch (Exception e)
                 {
-                   await Context.Channel.SendMessageAsync("That location might not be on the map or is invalid");
+                    await Context.Channel.SendMessageAsync("That location might not be on the map or is invalid");
                 }
             }
             else
@@ -495,7 +590,7 @@ namespace botTesting
                 EmbedBuilder embed = new EmbedBuilder();
                 embed.WithAuthor(user.Nickname ?? user.Username, user.GetAvatarUrl());
                 embed.WithColor(Color.Blue);
-                if(You.Id == user.Id)
+                if (You.Id == user.Id)
                 {
                     embed.WithFooter("Requested by yourself ;)");
                 }
@@ -506,7 +601,7 @@ namespace botTesting
                 string ca = user.CreatedAt.ToString();
                 string ja = user.JoinedAt.ToString();
                 int tempca = 0;
-                for(int i = 0; i < ca.Length; i++)
+                for (int i = 0; i < ca.Length; i++)
                 {
                     if (ca[i + 1] == '+')
                     {
@@ -530,7 +625,7 @@ namespace botTesting
                 embed.AddField("Status: ", user.Status);
                 embed.AddField("ID: ", user.Id);
                 embed.AddField("Username: ", user.Username);
-                if(!(user.Nickname == null))
+                if (!(user.Nickname == null))
                 {
                     embed.AddField("Nickname: ", user.Nickname);
                 }
@@ -557,6 +652,106 @@ namespace botTesting
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithImageUrl(catpic.ElementAt(0).url);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
+        }
+        [Command("reddit")]
+        public async Task Reddit(string subreddit, int index = 1)
+        {
+            HtmlWeb web = new HtmlWeb();
+            HtmlDocument document = web.Load("https://old.reddit.com/r/" + subreddit);
+            if (subreddit.Trim().Equals(""))
+            {
+                await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
+                return;
+            }
+            if (index < 1 || index > 9)
+            {
+                await Context.Channel.SendMessageAsync("Range is only from 1-9!");
+                return;
+            }
+            try
+            {
+                var link = "";
+                var hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank ']");
+                int count = 0;
+                foreach(var href in hrefs.ToList())
+                {
+                    if (href.Attributes["href"].Value.Contains("alb.reddit.com"))
+                    {
+                        hrefs.RemoveAt(count);
+                    }
+                    count++;
+                }
+                if(hrefs.Count < 9)
+                {
+                    hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank outbound']");
+                    if(hrefs.Count < 9)
+                    {
+                        await Context.Channel.SendMessageAsync("Not enough content in subreddit!");
+                        return;
+                    }
+                }
+                var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
+                if (eighteenLOL != null)
+                {
+                    try
+                    {
+                        var chromeOptions = new ChromeOptions();
+                        chromeOptions.AddArguments("headless");
+                        IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
+                        driver.Manage().Window.Maximize();
+                        driver.Url = "https://old.reddit.com/r/" + subreddit;
+                        var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));
+                        yesButton[1].Click();
+                        var imgLinkS = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
+                        var img = WebUtility.HtmlDecode(imgLinkS.ElementAt(index - 1).GetAttribute("href"));
+                        await Context.Channel.SendMessageAsync(img);
+                        driver.Close();
+                        return;
+                    }
+                    catch (Exception e)
+                    {
+                        await Context.Channel.SendMessageAsync(e.Message);
+                        return;
+                    }
+                }
+                else
+                {
+                    if (hrefs == null)
+                    {
+                        await Context.Channel.SendMessageAsync("Subreddit does not exist");
+                        return;
+                    }
+                    else
+                    {
+                        link = hrefs.ElementAt(index - 1).Attributes["href"].Value;                     
+                        if (link.StartsWith("https"))
+                        {                  
+                            await Context.Channel.SendMessageAsync(link);
+                            return;
+                        }
+                    }
+                    HtmlDocument page = web.Load("https://old.reddit.com" + link);
+                    var imgLink = page.DocumentNode.SelectNodes("//img[@class='preview']");
+                    bool hasImage = false;
+                    if (imgLink != null)
+                    {
+                        hasImage = true;
+                        var img = WebUtility.HtmlDecode(imgLink.ElementAt(0).Attributes["src"].Value);
+                        await Context.Channel.SendMessageAsync(img);
+                        return;
+                    }
+                    if (!hasImage)
+                    {
+                        string text = WebUtility.HtmlDecode(page.DocumentNode.SelectNodes("//div[@class='md']").ElementAt(1).InnerText);
+                        await Context.Channel.SendMessageAsync(text.Trim());
+                        return;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                await Context.Channel.SendMessageAsync(e.Message);
+            }
         }
     }
 }

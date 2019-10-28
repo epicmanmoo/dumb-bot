@@ -15,7 +15,6 @@ C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\bin\Debug\netcoreapp2.1\botT
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\bin\Debug\netcoreapp2.1\botTesting.dll
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\bin\Debug\netcoreapp2.1\botTesting.pdb
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\obj\Debug\netcoreapp2.1\botTesting.csprojAssemblyReference.cache
-C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\obj\Debug\netcoreapp2.1\botTesting.csproj.CoreCompileInputs.cache
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\obj\Debug\netcoreapp2.1\botTesting.AssemblyInfoInputs.cache
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\obj\Debug\netcoreapp2.1\botTesting.AssemblyInfo.cs
 C:\Users\mooaz\Desktop\Github\DiscordBot\botTesting\obj\Debug\netcoreapp2.1\botTesting.dll
