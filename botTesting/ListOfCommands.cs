@@ -652,20 +652,16 @@ namespace botTesting
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithImageUrl(catpic.ElementAt(0).url);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
-        }
+        }   
+        //make better :P
         [Command("reddit")]
-        public async Task Reddit(string subreddit, int index = 1)
+        public async Task Reddit(string subreddit, int index = 1, string picOrNot = "no")
         {
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load("https://old.reddit.com/r/" + subreddit);
             if (subreddit.Trim().Equals(""))
             {
                 await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
-                return;
-            }
-            if (index < 1 || index > 9)
-            {
-                await Context.Channel.SendMessageAsync("Range is only from 1-9!");
                 return;
             }
             try
@@ -681,14 +677,14 @@ namespace botTesting
                     }
                     count++;
                 }
-                if(hrefs.Count < 9)
+                if (picOrNot.Equals("yes"))
                 {
                     hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank outbound']");
-                    if(hrefs.Count < 9)
-                    {
-                        await Context.Channel.SendMessageAsync("Not enough content in subreddit!");
-                        return;
-                    }
+                }
+                if (index < 1 || index > hrefs.Count)
+                {
+                    await Context.Channel.SendMessageAsync("Range is only from 1-" + hrefs.Count + "!");
+                    return;
                 }
                 var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
                 if (eighteenLOL != null)
@@ -700,7 +696,7 @@ namespace botTesting
                         IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
                         driver.Manage().Window.Maximize();
                         driver.Url = "https://old.reddit.com/r/" + subreddit;
-                        var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));
+                        var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));        
                         yesButton[1].Click();
                         var imgLinkS = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
                         var img = WebUtility.HtmlDecode(imgLinkS.ElementAt(index - 1).GetAttribute("href"));
@@ -723,8 +719,8 @@ namespace botTesting
                     }
                     else
                     {
-                        link = hrefs.ElementAt(index - 1).Attributes["href"].Value;                     
-                        if (link.StartsWith("https"))
+                        link = hrefs.ElementAt(index - 1).Attributes["href"].Value;
+                        if (link.StartsWith("https") || link.Contains("jpg"))
                         {                  
                             await Context.Channel.SendMessageAsync(link);
                             return;
