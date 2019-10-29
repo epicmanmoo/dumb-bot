@@ -35,8 +35,7 @@ namespace botTesting
                 }
             }
         }
-        //[Command("signuploc")]
-        //
+        //updatesignup
         [Command("signup", RunMode = RunMode.Async)]
         public async Task SignUp()
         {

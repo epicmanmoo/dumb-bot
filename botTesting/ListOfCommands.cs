@@ -652,13 +652,37 @@ namespace botTesting
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithImageUrl(catpic.ElementAt(0).url);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
-        }   
+        }
         //make better :P
         [Command("reddit")]
         public async Task Reddit(string subreddit, int index = 1, string picOrNot = "no")
         {
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load("https://old.reddit.com/r/" + subreddit);
+            var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
+            if (eighteenLOL != null)
+            {
+                try
+                {
+                    var chromeOptions = new ChromeOptions();
+                    chromeOptions.AddArguments("headless");
+                    IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
+                    driver.Manage().Window.Maximize();
+                    driver.Url = "https://old.reddit.com/r/" + subreddit;
+                    var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));
+                    yesButton[1].Click();
+                    var imgLinkS = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
+                    var img = WebUtility.HtmlDecode(imgLinkS.ElementAt(index - 1).GetAttribute("href"));
+                    await Context.Channel.SendMessageAsync(img);
+                    driver.Close();
+                    return;
+                }
+                catch (Exception e)
+                {
+                    await Context.Channel.SendMessageAsync(e.Message);
+                    return;
+                }
+            }
             if (subreddit.Trim().Equals(""))
             {
                 await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
@@ -669,7 +693,7 @@ namespace botTesting
                 var link = "";
                 var hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank ']");
                 int count = 0;
-                foreach(var href in hrefs.ToList())
+                foreach (var href in hrefs.ToList())
                 {
                     if (href.Attributes["href"].Value.Contains("alb.reddit.com"))
                     {
@@ -686,30 +710,6 @@ namespace botTesting
                     await Context.Channel.SendMessageAsync("Range is only from 1-" + hrefs.Count + "!");
                     return;
                 }
-                var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
-                if (eighteenLOL != null)
-                {
-                    try
-                    {
-                        var chromeOptions = new ChromeOptions();
-                        chromeOptions.AddArguments("headless");
-                        IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
-                        driver.Manage().Window.Maximize();
-                        driver.Url = "https://old.reddit.com/r/" + subreddit;
-                        var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));        
-                        yesButton[1].Click();
-                        var imgLinkS = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
-                        var img = WebUtility.HtmlDecode(imgLinkS.ElementAt(index - 1).GetAttribute("href"));
-                        await Context.Channel.SendMessageAsync(img);
-                        driver.Close();
-                        return;
-                    }
-                    catch (Exception e)
-                    {
-                        await Context.Channel.SendMessageAsync(e.Message);
-                        return;
-                    }
-                }
                 else
                 {
                     if (hrefs == null)
@@ -721,7 +721,7 @@ namespace botTesting
                     {
                         link = hrefs.ElementAt(index - 1).Attributes["href"].Value;
                         if (link.StartsWith("https") || link.Contains("jpg"))
-                        {                  
+                        {
                             await Context.Channel.SendMessageAsync(link);
                             return;
                         }
@@ -738,9 +738,31 @@ namespace botTesting
                     }
                     if (!hasImage)
                     {
+                        EmbedBuilder textEmbed = new EmbedBuilder();
                         string text = WebUtility.HtmlDecode(page.DocumentNode.SelectNodes("//div[@class='md']").ElementAt(1).InnerText);
-                        await Context.Channel.SendMessageAsync(text.Trim());
-                        return;
+                        text = text.Trim();
+                        if (text.Length > 2048)
+                        {
+                            int tem = 0;
+                            for (int i = 2045; i >= 0; i--)
+                            {
+                                if (text.ElementAt(i) == '.')
+                                {
+                                    tem = i;
+                                    break;
+                                }
+                            }                   
+                            textEmbed.Description = text.Substring(0, tem+1);
+                            await Context.Channel.SendMessageAsync("", false, textEmbed.Build());
+                            await Context.Channel.SendMessageAsync("Read more at: https://reddit.com" + link);
+                            return;
+                        }
+                        else
+                        {
+                            textEmbed.Description = text;
+                            await Context.Channel.SendMessageAsync("", false, textEmbed.Build());
+                            return;
+                        }
                     }
                 }
             }

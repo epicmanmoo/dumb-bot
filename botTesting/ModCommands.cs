@@ -260,7 +260,7 @@ namespace botTesting
             if (!User.Guild.Roles.Contains(Role))
             {
                 await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
-                await User.Guild.GetTextChannel(565413968643096578).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                await User.Guild.GetTextChannel(Context.Channel.Id).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
                 await Context.Channel.SendMessageAsync(":x: Repeat command (one time thing)");
                 await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
                 return;
