@@ -54,6 +54,7 @@ namespace botTesting
             Client.UserJoined += AnnounceJoinedUser;
             Client.Log += Client_Log;
             Client.UserLeft += AnnounceLeavingUser;
+            Client.GuildMemberUpdated += GuildMemberUpdated;
             string[] lines = File.ReadAllLines(@"M:\token.txt");
             string token = lines[0];
             await Client.LoginAsync(TokenType.Bot, token);
@@ -175,6 +176,12 @@ namespace botTesting
                 }
                 return;
             }
+        }
+        //change in DB
+        public async Task GuildMemberUpdated(SocketGuildUser before, SocketGuildUser after)
+        {
+            Console.WriteLine(before.Nickname + " " + after.Nickname);
+            await before.Guild.GetTextChannel(597009241919979521).SendMessageAsync(before.Nickname + " " + after.Nickname);
         }
         private async Task Client_MessageReceived(SocketMessage MessageParam)
         {

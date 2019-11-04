@@ -259,35 +259,39 @@ namespace botTesting
             IRole Role = User.Guild.Roles.FirstOrDefault(x => x.Name == "muted");
             if (!User.Guild.Roles.Contains(Role))
             {
+                IEnumerable<SocketTextChannel> channels = Context.Guild.TextChannels;
                 await User.Guild.CreateRoleAsync("muted", new GuildPermissions());
-                await User.Guild.GetTextChannel(Context.Channel.Id).AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                foreach(SocketTextChannel channel in channels)
+                {
+                    await channel.AddPermissionOverwriteAsync(User.Guild.Roles.FirstOrDefault(x => x.Name == "muted"), new OverwritePermissions(sendMessages: PermValue.Deny));
+                }
                 await Context.Channel.SendMessageAsync(":x: Repeat command (one time thing)");
                 await UserExtensions.SendMessageAsync(User, "Do not remove the `muted` role created in the server");
+                IEnumerable<SocketRole> Roles = Context.Guild.Roles;
+                SocketRole[] SortingArr = Roles.OrderByDescending(x => x.Position).ToArray();
+                int IndexOfMuted = 0;
+                SocketRole Temp = SortingArr[0];
+                for (int i = 0; i < SortingArr.Length; i++)
+                {
+                    if (SortingArr[i].ToString().Equals("muted"))
+                    {
+                        IndexOfMuted = i;
+                        break;
+                    }
+                }
+                for (int i = 0; i < SortingArr.Length; i++)
+                {
+                    if (SortingArr[i].IsManaged)
+                    {
+                        Temp = SortingArr[i];
+                        SortingArr[i] = SortingArr[IndexOfMuted];
+                        SortingArr[IndexOfMuted] = Temp;
+                        break;
+                    }
+                }
+                await Role.ModifyAsync(x => x.Position = Temp.Position);
                 return;
             }
-            IEnumerable<SocketRole> Roles = Context.Guild.Roles;
-            SocketRole[] SortingArr = Roles.OrderByDescending(x => x.Position).ToArray();
-            int IndexOfMuted = 0;
-            SocketRole Temp = SortingArr[0];
-            for (int i = 0; i < SortingArr.Length; i++)
-            {
-                if (SortingArr[i].ToString().Equals("muted"))
-                {
-                    IndexOfMuted = i;
-                    break;
-                }
-            }
-            for (int i = 0; i < SortingArr.Length; i++)
-            {
-                if (SortingArr[i].IsManaged)
-                {
-                    Temp = SortingArr[i];
-                    SortingArr[i] = SortingArr[IndexOfMuted];
-                    SortingArr[IndexOfMuted] = Temp;
-                    break;
-                }
-            }
-            await Role.ModifyAsync(x => x.Position = Temp.Position);
         }
         [Command("unmute")]
         public async Task UnMute(SocketGuildUser OtherUser)
