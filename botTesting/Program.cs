@@ -178,10 +178,9 @@ namespace botTesting
             }
         }
         //change in DB
-        public async Task GuildMemberUpdated(SocketGuildUser before, SocketGuildUser after)
+        private async Task GuildMemberUpdated(SocketGuildUser before, SocketGuildUser after)
         {
-            Console.WriteLine(before.Nickname + " " + after.Nickname);
-            await before.Guild.GetTextChannel(597009241919979521).SendMessageAsync(before.Nickname + " " + after.Nickname);
+            //
         }
         private async Task Client_MessageReceived(SocketMessage MessageParam)
         {
