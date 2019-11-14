@@ -688,97 +688,77 @@ namespace botTesting
                 await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
                 return;
             }
+            HtmlNodeCollection href;
             try
             {
-                var link = "";
-                HtmlNodeCollection hrefs;
+                EmbedBuilder embed = new EmbedBuilder();
+                href = document.DocumentNode.SelectNodes("//ul[@class='flat-list buttons']/li[1]/a");
+                string link = href.ElementAt(index - 1).Attributes["href"].Value;
+                document = web.Load(link);
+                HtmlNode img;
+                string imgLink = "";
                 try
                 {
-                    hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank ']");
-                    await Context.Channel.SendMessageAsync(hrefs.IsReadOnly.ToString().Substring(0, 0) + "`Text:`");
-                }
-                catch (Exception e)
-                {
-                    hrefs = document.DocumentNode.SelectNodes("//a[@class='title may-blank outbound']");
-                    await Context.Channel.SendMessageAsync("`Image:`");
-                }
-                int count = 0;
-                foreach (var href in hrefs.ToList())
-                {
-                    if (href.Attributes["href"].Value.Contains("alb.reddit.com"))
-                    {
-                        hrefs.RemoveAt(count);
-                    }
-                    count++;
-                }
-                if (index < 1 || index > hrefs.Count)
-                {
-                    await Context.Channel.SendMessageAsync("Range is only from 1-" + hrefs.Count + "!");
+                    img = document.DocumentNode.SelectSingleNode("//div[@class='media-preview-content']");
+                    imgLink = img.FirstChild.Attributes["href"].Value;
+                    embed.WithImageUrl(imgLink);
+                    await Context.Channel.SendMessageAsync("", false, embed.Build());
                     return;
                 }
-                else
+                catch(Exception e)
                 {
-                    if (hrefs == null)
+                    try
                     {
-                        await Context.Channel.SendMessageAsync("Subreddit does not exist");
+                        try
+                        {
+                            img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank outbound']");
+                        }
+                        catch (Exception ee)
+                        {
+                            img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank ']");
+                        }
+                        imgLink = img.Attributes["href"].Value;
+                        embed.WithImageUrl(imgLink);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                         return;
                     }
-                    else
+                    catch(Exception ee)
                     {
-                        link = hrefs.ElementAt(index - 1).Attributes["href"].Value;
-                        if (link.StartsWith("https") || link.Contains("jpg"))
+                        var textLoc = document.DocumentNode.SelectNodes("//div[@class='usertext-body may-blank-within md-container ']");
+                        string text = WebUtility.HtmlDecode(textLoc.ElementAt(1).InnerText);
+                        if(text.Length > 2000)
                         {
-                            var imgLinks = document.DocumentNode.SelectNodes("//ul[@class='flat-list buttons']/li[1]/a");
-                            var imgLink = imgLinks.ElementAt(index - 1).Attributes["href"].Value;
-                            EmbedBuilder imgEmbed = new EmbedBuilder();
-                            imgEmbed.WithTitle(WebUtility.HtmlDecode("**" + hrefs.ElementAt(index - 1).InnerText + "**"));
-                            imgEmbed.WithImageUrl(link);
-                            imgEmbed.WithFooter("Viewing " + index + "/" + hrefs.Count);
-                            await Context.Channel.SendMessageAsync("", false, imgEmbed.Build());
-                            await Context.Channel.SendMessageAsync("<" + imgLink + ">");
+                            int temp = 0;
+                            for(int i = 2000; i >= 0; i--)
+                            {
+                                if(text[i] == '.')
+                                {
+                                    temp = i;
+                                    break;
+                                }
+                            }
+                            embed.WithDescription(text.Substring(0, temp+1));
+                            await Context.Channel.SendMessageAsync("", false, embed.Build());
                             return;
                         }
-                    }
-                    HtmlDocument page = web.Load("https://old.reddit.com" + link);
-                    EmbedBuilder textEmbed = new EmbedBuilder();
-                    textEmbed.Title = WebUtility.HtmlDecode("**" + hrefs.ElementAt(index - 1).InnerText + "**");
-                    string text = page.DocumentNode.SelectNodes("//div[@class='md']").ElementAt(1).InnerText;
-                    text = text.Trim();
-                    if (text.Length > 2030)
-                    {
-                        int tem = 0;
-                        for (int i = 2000; i >= 0; i--)
-                        {
-                            if (text.ElementAt(i) == '.')
-                            {
-                                tem = i;
-                                break;
-                            }
-                        }
-                        textEmbed.Description = WebUtility.HtmlDecode(text.Substring(0, tem + 1) + "\n**Viewing " + index + "/" + hrefs.Count + "**");
-                        await Context.Channel.SendMessageAsync("", false, textEmbed.Build());
-                        await Context.Channel.SendMessageAsync("Read more at: <https://reddit.com" + link+">");
-                        return;
-                    }
-                    else
-                    {
-                        textEmbed.Description = WebUtility.HtmlDecode("\n" + text + "\n**Viewing " + index + "/" + hrefs.Count+"**");
-                        await Context.Channel.SendMessageAsync("", false, textEmbed.Build());
-                        await Context.Channel.SendMessageAsync("<https://reddit.com" + link+">");
+                        embed.WithDescription(text);
+                        await Context.Channel.SendMessageAsync("", false, embed.Build());
                         return;
                     }
                 }
             }
             catch (Exception e)
             {
-                await Context.Channel.SendMessageAsync("Subreddit does not exist");
+                await Context.Channel.SendMessageAsync(e.Message);
             }
         }
+        //get username (obv), follower, following, pfp... for now
         [Command("instaprofile")]
         public async Task InstaProfile(string username)
         {
 
         }
+        //desmos screenshot?
         [Command("graph")]
         public async Task Graph(string equation)
         {
