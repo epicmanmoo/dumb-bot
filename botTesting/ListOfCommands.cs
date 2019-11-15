@@ -655,101 +655,138 @@ namespace botTesting
         }
         //make selenium part better ;P
         [Command("reddit")]
-        public async Task Reddit(string subreddit, int index = 1)
+        public async Task Reddit(string subreddit, int index = 0)
         {
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load("https://old.reddit.com/r/" + subreddit);
-            var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
-            if (eighteenLOL != null)
+            if (index == 0)
             {
+                EmbedBuilder subInfo = new EmbedBuilder();
+                subInfo.WithTitle("r/" + subreddit);
+                document = web.Load("https://reddit.com/r/" + subreddit);
                 try
                 {
-                    var chromeOptions = new ChromeOptions();
-                    chromeOptions.AddArguments("headless");
-                    IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
-                    driver.Manage().Window.Maximize();
-                    driver.Url = "https://old.reddit.com/r/" + subreddit;
-                    var yesButton = driver.FindElements(By.XPath("//button[@class ='c-btn c-btn-primary']"));
-                    yesButton[1].Click();
-                    var imgLinkS = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
-                    var img = WebUtility.HtmlDecode(imgLinkS.ElementAt(index - 1).GetAttribute("href"));
-                    await Context.Channel.SendMessageAsync(img);
-                    driver.Close();
+                    var descObj = document.DocumentNode.SelectSingleNode("//div[@class='_1zPvgKHteTOub9dKkvrOl4 ']");
+                    string desc = descObj.InnerText;
+                    try
+                    {
+                        var imgObj = document.DocumentNode.SelectSingleNode("//div[@class='_20Kb6TX_CdnePoT8iEsls6']");
+                        string img = imgObj.FirstChild.Attributes["src"].Value;
+                        subInfo.WithImageUrl(img);
+                    }
+                    catch(Exception e)
+                    {
+                        subInfo.WithDescription("**Subreddit has default icon**\n\n");
+                    }
+                    var subsObj = document.DocumentNode.SelectNodes("//p[@class='_3XFx6CfPlg-4Usgxm0gK8R']")[0];
+                    string subs = subsObj.InnerText;
+                    var subsDescObj = document.DocumentNode.SelectNodes("//p[@class='_29_mu5qI8E1fq6Uq5koje8']")[0];
+                    string subsDesc = subsDescObj.InnerText;
+                    var onlineObj = document.DocumentNode.SelectNodes("//p[@class='_3XFx6CfPlg-4Usgxm0gK8R']")[1];
+                    var online = onlineObj.InnerText;
+                    var onlineDescObj = document.DocumentNode.SelectNodes("//p[@class='_29_mu5qI8E1fq6Uq5koje8']")[1];
+                    var onlineDesc = onlineDescObj.InnerText;
+                    var creationObj = document.DocumentNode.SelectNodes("//p[@class='_3XFx6CfPlg-4Usgxm0gK8R']")[2];
+                    var creation = creationObj.InnerText;
+                    subInfo.Description += "**Subscribers:** " + subs + " " + subsDesc + "\n **Online:** " + online + " " + onlineDesc + "\n **Subreddit Creation Date:** " + creation;
+                    subInfo.WithFooter("Type a number after the subreddit name!");
+                    await Context.Channel.SendMessageAsync("", false, subInfo.Build());
                     return;
                 }
                 catch (Exception e)
                 {
-                    await Context.Channel.SendMessageAsync(e.Message);
-                    return;
+                    await Context.Channel.SendMessageAsync("Subreddit does not exist");
                 }
             }
-            if (subreddit.Trim().Equals(""))
+            else
             {
-                await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
-                return;
-            }
-            HtmlNodeCollection href;
-            try
-            {
-                EmbedBuilder embed = new EmbedBuilder();
-                href = document.DocumentNode.SelectNodes("//ul[@class='flat-list buttons']/li[1]/a");
-                string link = href.ElementAt(index - 1).Attributes["href"].Value;
-                document = web.Load(link);
-                HtmlNode img;
-                string imgLink = "";
-                try
+                var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
+                if (eighteenLOL != null)
                 {
-                    img = document.DocumentNode.SelectSingleNode("//div[@class='media-preview-content']");
-                    imgLink = img.FirstChild.Attributes["href"].Value;
-                    embed.WithImageUrl(imgLink);
-                    await Context.Channel.SendMessageAsync("", false, embed.Build());
-                    return;
+                    //selenium stuff
+
                 }
-                catch(Exception e)
+                else
                 {
-                    try
+                    if (subreddit.Trim().Equals(""))
                     {
-                        try
-                        {
-                            img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank outbound']");
-                        }
-                        catch (Exception ee)
-                        {
-                            img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank ']");
-                        }
-                        imgLink = img.Attributes["href"].Value;
-                        embed.WithImageUrl(imgLink);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
+                        await Context.Channel.SendMessageAsync("Please enter a valid subreddit!");
                         return;
                     }
-                    catch(Exception ee)
+                    HtmlNodeCollection href;
+                    try
                     {
-                        var textLoc = document.DocumentNode.SelectNodes("//div[@class='usertext-body may-blank-within md-container ']");
-                        string text = WebUtility.HtmlDecode(textLoc.ElementAt(1).InnerText);
-                        if(text.Length > 2000)
+                        EmbedBuilder embed = new EmbedBuilder();
+                        href = document.DocumentNode.SelectNodes("//ul[@class='flat-list buttons']/li[1]/a");
+                        if(index < 0 || index > href.Count)
                         {
-                            int temp = 0;
-                            for(int i = 2000; i >= 0; i--)
-                            {
-                                if(text[i] == '.')
-                                {
-                                    temp = i;
-                                    break;
-                                }
-                            }
-                            embed.WithDescription(text.Substring(0, temp+1));
+                            await Context.Channel.SendMessageAsync("Range must be from 1-" + href.Count + "!");
+                            return;
+                        }
+                        string link = href.ElementAt(index - 1).Attributes["href"].Value;
+                        document = web.Load(link);
+                        string title = WebUtility.HtmlDecode(document.DocumentNode.SelectSingleNode("html/head/title").InnerText);
+                        title = title.Substring(0, title.Length - (subreddit.Length + 3));
+                        embed.WithTitle(title);
+                        embed.WithFooter(index + "/" + href.Count);
+                        HtmlNode img;
+                        string imgLink = "";
+                        try
+                        {
+                            img = document.DocumentNode.SelectSingleNode("//div[@class='media-preview-content']");
+                            imgLink = img.FirstChild.Attributes["href"].Value;
+                            embed.WithImageUrl(imgLink);           
                             await Context.Channel.SendMessageAsync("", false, embed.Build());
                             return;
                         }
-                        embed.WithDescription(text);
-                        await Context.Channel.SendMessageAsync("", false, embed.Build());
-                        return;
+                        catch (Exception e)
+                        {
+                            try
+                            {
+                                try
+                                {
+                                    img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank outbound']");
+                                }
+                                catch (Exception ee)
+                                {
+                                    img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank ']");
+                                }
+                                imgLink = img.FirstChild.Attributes["src"].Value;
+                                await Context.Channel.SendMessageAsync(imgLink.Substring(2));
+                                embed.WithImageUrl("https://" + imgLink.Substring(2));
+                                await Context.Channel.SendMessageAsync("", false, embed.Build());
+                                return;
+                            }
+                            catch (Exception ee)
+                            {
+                                var textLoc = document.DocumentNode.SelectNodes("//div[@class='usertext-body may-blank-within md-container ']");
+                                string text = WebUtility.HtmlDecode(textLoc.ElementAt(1).InnerText);
+                                if (text.Length > 2000)
+                                {
+                                    int temp = 0;
+                                    for (int i = 2000; i >= 0; i--)
+                                    {
+                                        if (text[i] == '.')
+                                        {
+                                            temp = i;
+                                            break;
+                                        }
+                                    }
+                                    embed.WithDescription(text.Substring(0, temp + 1));
+                                    await Context.Channel.SendMessageAsync("", false, embed.Build());
+                                    return;
+                                }
+                                embed.WithDescription(text);
+                                await Context.Channel.SendMessageAsync("", false, embed.Build());
+                                return;
+                            }
+                        }
+                    }
+                    catch (Exception e)
+                    {
+                        await Context.Channel.SendMessageAsync("Subreddit does not exist");
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                await Context.Channel.SendMessageAsync(e.Message);
             }
         }
         //get username (obv), follower, following, pfp... for now
