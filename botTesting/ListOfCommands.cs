@@ -659,6 +659,12 @@ namespace botTesting
         {
             HtmlWeb web = new HtmlWeb();
             HtmlDocument document = web.Load("https://old.reddit.com/r/" + subreddit);
+            var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
+            if (eighteenLOL != null)
+            {
+                await Context.Channel.SendMessageAsync("Will take longer to load because of 18+");
+                return;
+            }
             if (index == 0)
             {
                 EmbedBuilder subInfo = new EmbedBuilder();
@@ -700,11 +706,9 @@ namespace botTesting
             }
             else
             {
-                var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
                 if (eighteenLOL != null)
                 {
-                    //selenium stuff
-
+                    //this is useless i'm just too lazy to remove
                 }
                 else
                 {
@@ -729,6 +733,8 @@ namespace botTesting
                         title = title.Substring(0, title.Length - (subreddit.Length + 3));
                         embed.WithTitle(title);
                         embed.WithFooter(index + "/" + href.Count);
+                        link = link.Replace("https://old.", "https://");
+                        embed.WithDescription(link);
                         HtmlNode img;
                         string imgLink = "";
                         try
@@ -752,7 +758,6 @@ namespace botTesting
                                     img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank ']");
                                 }
                                 imgLink = img.FirstChild.Attributes["src"].Value;
-                                await Context.Channel.SendMessageAsync(imgLink.Substring(2));
                                 embed.WithImageUrl("https://" + imgLink.Substring(2));
                                 await Context.Channel.SendMessageAsync("", false, embed.Build());
                                 return;
@@ -773,10 +778,12 @@ namespace botTesting
                                         }
                                     }
                                     embed.WithDescription(text.Substring(0, temp + 1));
+                                    embed.Description += "\n\n" + link;
                                     await Context.Channel.SendMessageAsync("", false, embed.Build());
                                     return;
                                 }
                                 embed.WithDescription(text);
+                                embed.Description += "\n\n" + link;
                                 await Context.Channel.SendMessageAsync("", false, embed.Build());
                                 return;
                             }
