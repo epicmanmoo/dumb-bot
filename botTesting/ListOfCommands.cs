@@ -662,8 +662,31 @@ namespace botTesting
             var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
             if (eighteenLOL != null)
             {
-                await Context.Channel.SendMessageAsync("Will take longer to load because of 18+");
-                return;
+                //await Context.Channel.SendMessageAsync("Will take longer to load because of 18+");
+                var chromeOptions = new ChromeOptions();
+                //chromeOptions.AddArguments("headless");
+                IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
+                driver.Manage().Window.Maximize();         
+                driver.Url = "https://old.reddit.com/r/" + subreddit;
+                var yesButton = driver.FindElements(By.XPath("//button[@class='c-btn c-btn-primary']"));
+                yesButton[1].Click();
+                var links = driver.FindElements(By.XPath("//ul[@class='flat-list buttons']/li[2]/a"));
+                await Context.Channel.SendMessageAsync(links.Count + "");
+                if (index == 0)
+                {
+                    Random rand = new Random();
+                    var spclImgLinks = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
+                    int ughIGottaRandomizeEmForTheImageURL = rand.Next(0, spclImgLinks.Count);
+                    string link = links.ElementAt(ughIGottaRandomizeEmForTheImageURL).GetAttribute("href");
+                    await Context.Channel.SendMessageAsync(link);
+                    return; 
+                }
+                else
+                {
+                    string link = links.ElementAt(index-1).GetAttribute("href");
+
+                    //
+                }
             }
             if (index == 0)
             {
@@ -678,7 +701,7 @@ namespace botTesting
                     {
                         var imgObj = document.DocumentNode.SelectSingleNode("//div[@class='_20Kb6TX_CdnePoT8iEsls6']");
                         string img = imgObj.FirstChild.Attributes["src"].Value;
-                        subInfo.WithImageUrl(img);
+                        subInfo.WithImageUrl(WebUtility.HtmlDecode(img));
                     }
                     catch(Exception e)
                     {
@@ -727,7 +750,7 @@ namespace botTesting
                             await Context.Channel.SendMessageAsync("Range must be from 1-" + href.Count + "!");
                             return;
                         }
-                        string link = href.ElementAt(index - 1).Attributes["href"].Value;
+                        string link = WebUtility.HtmlDecode(href.ElementAt(index - 1).Attributes["href"].Value);
                         document = web.Load(link);
                         string title = WebUtility.HtmlDecode(document.DocumentNode.SelectSingleNode("html/head/title").InnerText);
                         title = title.Substring(0, title.Length - (subreddit.Length + 3));
@@ -757,7 +780,7 @@ namespace botTesting
                                 {
                                     img = document.DocumentNode.SelectSingleNode("//a[@class='thumbnail invisible-when-pinned may-blank ']");
                                 }
-                                imgLink = img.FirstChild.Attributes["src"].Value;
+                                imgLink = WebUtility.HtmlDecode(img.FirstChild.Attributes["src"].Value);
                                 embed.WithImageUrl("https://" + imgLink.Substring(2));
                                 await Context.Channel.SendMessageAsync("", false, embed.Build());
                                 return;
