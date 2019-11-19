@@ -115,6 +115,7 @@ namespace botTesting
             ["Japanese"] = "ja",
             ["Malay"] = "ms"
         };
+        public static bool reddit18Plus = false;
         [Command("hello")]
         public async Task Hello()
         {
@@ -662,30 +663,44 @@ namespace botTesting
             var eighteenLOL = document.DocumentNode.SelectSingleNode("//button[@class='c-btn c-btn-primary']");
             if (eighteenLOL != null)
             {
-                //await Context.Channel.SendMessageAsync("Will take longer to load because of 18+");
-                var chromeOptions = new ChromeOptions();
-                //chromeOptions.AddArguments("headless");
-                IWebDriver driver = new ChromeDriver("C:\\", chromeOptions);
-                driver.Manage().Window.Maximize();         
-                driver.Url = "https://old.reddit.com/r/" + subreddit;
-                var yesButton = driver.FindElements(By.XPath("//button[@class='c-btn c-btn-primary']"));
-                yesButton[1].Click();
-                var links = driver.FindElements(By.XPath("//ul[@class='flat-list buttons']/li[2]/a"));
-                await Context.Channel.SendMessageAsync(links.Count + "");
-                if (index == 0)
+                try
                 {
-                    Random rand = new Random();
-                    var spclImgLinks = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
-                    int ughIGottaRandomizeEmForTheImageURL = rand.Next(0, spclImgLinks.Count);
-                    string link = links.ElementAt(ughIGottaRandomizeEmForTheImageURL).GetAttribute("href");
-                    await Context.Channel.SendMessageAsync(link);
-                    return; 
+                    IWebDriver driver = Program.driver;
+                    driver.Url = "https://old.reddit.com/r/" + subreddit;
+                    if (!reddit18Plus)
+                    {
+                        var yesButton = driver.FindElements(By.XPath("//button[@class='c-btn c-btn-primary']"));
+                        yesButton[1].Click();
+                        reddit18Plus = true;    
+                    }
+                    if (index == 0)
+                    {
+                        EmbedBuilder subInfo = new EmbedBuilder();
+                        Random rand = new Random();
+                        var spclImgLinks = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
+                        int ughIGottaRandomizeEmForTheImageURL = rand.Next(0, spclImgLinks.Count);
+                        string link = spclImgLinks.ElementAt(ughIGottaRandomizeEmForTheImageURL).GetAttribute("href");
+                        if (link.Contains("jpg"))
+                        {
+                            subInfo.WithImageUrl(link);
+                            await Context.Channel.SendMessageAsync("", false, subInfo.Build());
+                            return;
+                        }
+                        else
+                        {
+                            link = "No pic";
+                        }
+                    }
+                    else
+                    {
+                        var links = driver.FindElements(By.XPath("//ul[@class='flat-list buttons']/li[2]/a"));
+                        string link = links.ElementAt(index - 1).GetAttribute("href");
+                        //
+                    }
                 }
-                else
+                catch(Exception e)
                 {
-                    string link = links.ElementAt(index-1).GetAttribute("href");
-
-                    //
+                    await Context.Channel.SendMessageAsync(e.Message);
                 }
             }
             if (index == 0)
@@ -703,7 +718,7 @@ namespace botTesting
                         string img = imgObj.FirstChild.Attributes["src"].Value;
                         subInfo.WithImageUrl(WebUtility.HtmlDecode(img));
                     }
-                    catch(Exception e)
+                    catch (Exception e)
                     {
                         subInfo.WithDescription("**Subreddit has default icon**\n\n");
                     }
@@ -745,7 +760,7 @@ namespace botTesting
                     {
                         EmbedBuilder embed = new EmbedBuilder();
                         href = document.DocumentNode.SelectNodes("//ul[@class='flat-list buttons']/li[1]/a");
-                        if(index < 0 || index > href.Count)
+                        if (index < 0 || index > href.Count)
                         {
                             await Context.Channel.SendMessageAsync("Range must be from 1-" + href.Count + "!");
                             return;
@@ -764,7 +779,7 @@ namespace botTesting
                         {
                             img = document.DocumentNode.SelectSingleNode("//div[@class='media-preview-content']");
                             imgLink = img.FirstChild.Attributes["href"].Value;
-                            embed.WithImageUrl(imgLink);           
+                            embed.WithImageUrl(imgLink);
                             await Context.Channel.SendMessageAsync("", false, embed.Build());
                             return;
                         }

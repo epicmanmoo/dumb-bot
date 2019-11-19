@@ -10,13 +10,15 @@ using FluentScheduler;
 using Microsoft.Extensions.DependencyInjection;
 using Discord.Addons.Interactive;
 using System.IO;
+using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium;
 
 namespace botTesting
 {
     class Program : ModuleBase<SocketCommandContext>
     {
         public readonly string weirdString = "sexsexsexseeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxx66666969696wetsfsfscxvvc";
-
+        public static IWebDriver driver;
         private DiscordSocketClient Client;
         private CommandService Commands;
         private IServiceProvider services;
@@ -55,13 +57,25 @@ namespace botTesting
             Client.Log += Client_Log;
             Client.UserLeft += AnnounceLeavingUser;
             Client.GuildMemberUpdated += GuildMemberUpdated;
+            Client.Connected += Connected;
+            Client.Disconnected += Disconnected;
             string[] lines = File.ReadAllLines(@"M:\token.txt");
             string token = lines[0];
             await Client.LoginAsync(TokenType.Bot, token);
             await Client.StartAsync();
             await Task.Delay(-1);
         }
-
+        private async Task Connected()
+        {
+            var chromeOptions = new ChromeOptions();
+            chromeOptions.AddArguments("headless");
+            driver = new ChromeDriver("C:\\", chromeOptions);
+            driver.Manage().Window.Maximize();
+        }
+        private async Task Disconnected(Exception arg)
+        {
+            driver.Close();
+        }
         private async Task Commands_CommandExecutedAsync(Optional<CommandInfo> command, ICommandContext Context, IResult result)
         {
             SocketGuildUser Admin = Context.User as SocketGuildUser;
