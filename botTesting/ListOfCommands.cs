@@ -675,20 +675,26 @@ namespace botTesting
                     }
                     if (index == 0)
                     {
+                        //check if url same as before?
                         EmbedBuilder subInfo = new EmbedBuilder();
                         Random rand = new Random();
                         var spclImgLinks = driver.FindElements(By.XPath("//a[@class='thumbnail invisible-when-pinned may-blank outbound']"));
                         int ughIGottaRandomizeEmForTheImageURL = rand.Next(0, spclImgLinks.Count);
-                        string link = spclImgLinks.ElementAt(ughIGottaRandomizeEmForTheImageURL).GetAttribute("href");
-                        if (link.Contains("jpg"))
+                        string script = "return window.getComputedStyle(document.getElementsByClassName('number')[0],':after').getPropertyValue('content')";
+                        IJavaScriptExecutor js = (IJavaScriptExecutor)driver;
+                        var content = (string)js.ExecuteScript(script);
+                        if (content.Equals("none"))
                         {
-                            subInfo.WithImageUrl(link);
-                            await Context.Channel.SendMessageAsync("", false, subInfo.Build());
-                            return;
+                            //content = driver.FindElement()
                         }
-                        else
+                        string link = spclImgLinks.ElementAt(ughIGottaRandomizeEmForTheImageURL).GetAttribute("href");
+                        if (spclImgLinks.Count == 0 || !(link.Contains("jpg")))
                         {
                             link = "No pic";
+                        }
+                        else if (link.Contains("jpg"))
+                        {
+                            subInfo.WithImageUrl(link);
                         }
                     }
                     else
