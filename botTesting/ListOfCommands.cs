@@ -14,6 +14,7 @@ using System.IO;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using System.Threading;
+using System.Net.Http;
 
 namespace botTesting
 {
@@ -654,8 +655,8 @@ namespace botTesting
             embed.WithImageUrl(catpic.ElementAt(0).url);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
-        //make selenium part better ;P
-        [Command("reddit")]
+        
+        /*[Command("reddit")]
         public async Task Reddit(string subreddit, int index = 0)
         {
             HtmlWeb web = new HtmlWeb();
@@ -839,7 +840,8 @@ namespace botTesting
                     }
                 }
             }
-        }
+        }*/
+        
         //get username (obv), follower, following, pfp... for now
         [Command("instaprofile")]
         public async Task InstaProfile(string username)
