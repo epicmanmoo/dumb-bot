@@ -655,12 +655,6 @@ namespace botTesting
             embed.WithImageUrl(catpic.ElementAt(0).url);
             await Context.Channel.SendMessageAsync("", false, embed.Build());
         }
-        //get username (obv), follower, following, pfp... for now
-        [Command("instaprofile")]
-        public async Task InstaProfile(string username)
-        {
-
-        }
         //desmos screenshot?
         [Command("graph")]
         public async Task Graph(string equation)
