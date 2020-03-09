@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj": {}
+    "C:\\Users\\mooaz\\OneDrive\\Documents\\GitHub\\dumb-bot\\botTesting\\botTesting.csproj": {}
   },
   "projects": {
-    "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj": {
+    "C:\\Users\\mooaz\\OneDrive\\Documents\\GitHub\\dumb-bot\\botTesting\\botTesting.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj",
+        "projectUniqueName": "C:\\Users\\mooaz\\OneDrive\\Documents\\GitHub\\dumb-bot\\botTesting\\botTesting.csproj",
         "projectName": "botTesting",
-        "projectPath": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\botTesting.csproj",
+        "projectPath": "C:\\Users\\mooaz\\OneDrive\\Documents\\GitHub\\dumb-bot\\botTesting\\botTesting.csproj",
         "packagesPath": "C:\\Users\\mooaz\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\obj\\",
+        "outputPath": "C:\\Users\\mooaz\\OneDrive\\Documents\\GitHub\\dumb-bot\\botTesting\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\mooaz\\AppData\\Roaming\\NuGet\\NuGet.Config",
@@ -109,7 +109,7 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.0.100\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.101\\RuntimeIdentifierGraph.json"
         }
       }
     }
