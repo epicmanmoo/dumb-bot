@@ -69,7 +69,7 @@ namespace botTesting
         {
             var chromeOptions = new ChromeOptions();
             chromeOptions.AddArguments("headless");
-            driver = new ChromeDriver("C:\\Users\\mooaz\\Desktop\\Github\\DiscordBot\\botTesting\\", chromeOptions);
+            driver = new ChromeDriver("chromedriver.exe location", chromeOptions);
             driver.Manage().Window.Maximize();
         }
         private async Task Disconnected(Exception arg)
